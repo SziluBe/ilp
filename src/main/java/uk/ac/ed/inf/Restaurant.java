@@ -7,6 +7,7 @@ import java.io.IOException;
 
 public class Restaurant {
     public Restaurant(String name, double longitude, double latitude, Menu[] menu){
+        // TODO: maybe validate inputs?
         this.name = name;
         this.longitude = longitude;
         this.latitude = latitude;
@@ -38,6 +39,7 @@ public class Restaurant {
         try {
             return new ObjectMapper().readValue(new URL(serverBaseAddress + "restaurants/"), Restaurant[].class);
         } catch (IOException e) {
+            // TODO
             e.printStackTrace();
             return null;
         }

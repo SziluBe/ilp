@@ -15,10 +15,7 @@ public record LngLat(double lng, double lat){
     }
 
     public boolean closeTo(LngLat target){
-        // TODO: maybe store constants somewhere better
-        double CLOSETO_DIST = 0.00015;
-
-        return this.distanceTo(target) < CLOSETO_DIST;
+        return this.distanceTo(target) < Constants.CLOSETO_DIST;
     }
 
     public LngLat nextPosition(CmpDir dir){

@@ -3,7 +3,6 @@ package uk.ac.ed.inf;
 public class Menu {
     public Menu(String name, int priceInPence){
         this.name = name;
-        // TODO: maybe validate that price is positive?
         this.priceInPence = priceInPence;
     }
 

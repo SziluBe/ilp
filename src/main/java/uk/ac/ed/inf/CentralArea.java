@@ -3,6 +3,8 @@ package uk.ac.ed.inf;
 import java.net.URL;
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public enum CentralArea {
@@ -22,8 +24,7 @@ public enum CentralArea {
 
     public static CentralArea getInstance(URL serverBaseAddress){
         if (serverBaseAddress == null){
-            // TODO
-            throw new RuntimeException();
+            serverBaseAddress = Constants.DEFAULT_BASE_ADDRESS;
         }
 
         if (CENTRAL_AREA.serverBaseAddress == null){
@@ -48,7 +49,16 @@ public enum CentralArea {
             }
 
             return corners;
+        } catch (JsonMappingException e) {
+            System.out.println("Uh oh, an error has occurred while parsing the Central Area's data. Are you sure the source data matches the required format?");
+            e.printStackTrace();
+            return null;
+        } catch (JsonParseException e) {
+            System.out.println("Uh oh, an error has occurred while parsing the Central Area's data. It seems like the source data is not valid JSON, are you sure you have provided a correct URL?");
+            e.printStackTrace();
+            return null;
         } catch (IOException e) {
+            System.out.println("Uh oh, an error has occurred while retrieving the Central Area's data. Are you sure you have provided a correct URL?");
             e.printStackTrace();
             return null;
         }

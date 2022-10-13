@@ -16,10 +16,4 @@ public class Menu {
     public int getPriceInPence() {
         return priceInPence;
     }
-
-// TODO
-//    public int getDeliveryCost(String... items){
-//
-//    }
-// TODO: documentation for all classes
 }

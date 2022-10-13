@@ -1,5 +1,6 @@
 package uk.ac.ed.inf;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Order {
@@ -23,6 +24,51 @@ public class Order {
     private final int priceTotalInPence;
     private final String[] orderItems;
 
+    public int getDeliveryCost(Restaurant[] restaurants, String... pizzaNames) throws InvalidPizzaCombination {
+        if (!checkPizzaCombination(restaurants, pizzaNames)) {
+            throw new InvalidPizzaCombination();
+        } // no need for `else` since we are throwing an exception in the body of the if statement
+
+        return calcTotal(restaurants, pizzaNames) + Constants.DELIVERY_CHARGE;
+    }
+
+    private boolean checkPizzaCombination(Restaurant[] restaurants, String[] pizzaNames) {
+        Set<String> orderItemsSet = new HashSet<>(Arrays.asList(pizzaNames));
+
+        List<Restaurant> restaurantList = Arrays.stream(restaurants)
+                .filter(restaurant -> {
+                    Set<String> menuItemNames = new HashSet<>(Arrays.stream(restaurant.getMenu())
+                            .map(Menu::getName)
+                            .toList()); // create set of pizza names available at each restaurant
+
+                    menuItemNames.retainAll(orderItemsSet); // find intersection between order and pizzas available (names)
+
+                    return menuItemNames.size() > 0; // discard any restaurant that we haven't ordered pizzas from
+                })
+                .toList();
+
+        return restaurantList.size() == 1; // make sure the order only has pizzas from exactly one restaurant
+    }
+
+    private int calcTotal(Restaurant[] restaurants, String[] pizzaNames) {
+        List<Menu> allMenuItems = getAllMenuItems(restaurants);
+
+        Set<String> pizzaNamesSet = new HashSet<>(Arrays.asList(pizzaNames)); // for faster lookup
+
+        return allMenuItems.stream()
+                .filter(menuItem -> { // filter for pizzas whose name appears in the list of names
+                    return pizzaNamesSet.contains(menuItem.getName());
+                })
+                .map(Menu::getPriceInPence) // get their prices
+                .reduce(0, Integer::sum);
+    }
+
+
+
+
+
+
+    // stuff that'll probably be useful later
     private boolean checkCardNumber() {
         boolean checkOnlyDigits = this.creditCardNumber.matches("[0-9]+");
         boolean checkLength = this.creditCardNumber.length() == 16;
@@ -59,7 +105,7 @@ public class Order {
                 });
     }
 
-    private boolean checkPizzasDefined() {
+    private boolean checkPizzasDefined() throws IOException {
         // TODO: change address in CW2
         Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
         try { // Make sure we don't crash if we somehow get a null value in restaurants
@@ -78,7 +124,7 @@ public class Order {
                 .allMatch(allMenuNames::contains); // ensure every pizza name in the order is present in at least one restaurant's menu
     }
 
-    private boolean checkTotal() {
+    private boolean checkTotal() throws IOException {
         // difficult to remove code duplication and also retain readability due to the try-catch, I think the code is least confusing kept this way
         // TODO: change address in CW2
         Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
@@ -88,45 +134,7 @@ public class Order {
             return false;
         }
 
-        List<Menu> allMenuItems = getAllMenuItems(restaurants);
-
-        Set<String> orderItemsSet = new HashSet<>(Arrays.asList(this.orderItems)); // for faster lookup
-
-        int calculatedTotal = allMenuItems.stream()
-                .filter(menuItem -> { // filter for items whose name appears in the order
-                    return orderItemsSet.contains(menuItem.getName());
-                })
-                .map(Menu::getPriceInPence) // get their prices
-                .reduce(0, Integer::sum); // and sum
-
-        return calculatedTotal == this.priceTotalInPence;
-    }
-
-    private boolean checkPizzaCombination() {
-        // difficult to remove code duplication and also retain readability due to the try-catch, I think the code is least confusing kept this way
-        // TODO: change address in CW2
-        Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
-        try { // Make sure we don't crash if we somehow get a null value in restaurants
-            assert restaurants != null;
-        } catch (AssertionError e) {
-            return false;
-        }
-
-        Set<String> orderItemsSet = new HashSet<>(Arrays.asList(this.orderItems));
-
-        List<Restaurant> restaurantList = Arrays.stream(restaurants)
-                .filter(restaurant -> {
-                    Set<String> menuItemNames = new HashSet<>(Arrays.stream(restaurant.getMenu())
-                            .map(Menu::getName)
-                            .toList()); // create set of pizza names available at each restaurant
-
-                    menuItemNames.retainAll(orderItemsSet); // find intersection between order and pizzas available (names)
-
-                    return menuItemNames.size() > 0; // discard any restaurant that we haven't ordered pizzas from
-                })
-                .toList();
-
-        return restaurantList.size() == 1; // make sure the order only has pizzas from exactly one restaurant
+        return calcTotal(restaurants, this.orderItems) == this.priceTotalInPence;
     }
 
 }

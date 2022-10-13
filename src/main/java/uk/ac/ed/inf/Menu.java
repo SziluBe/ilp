@@ -1,7 +1,11 @@
 package uk.ac.ed.inf;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Menu {
-    public Menu(String name, int priceInPence){
+    @JsonCreator
+    public Menu(@JsonProperty("name") String name, @JsonProperty("priceInPence") int priceInPence){
         this.name = name;
         this.priceInPence = priceInPence;
     }

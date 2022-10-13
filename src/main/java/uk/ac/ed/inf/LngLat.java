@@ -7,10 +7,10 @@ public record LngLat(double lng, double lat){
         int i;
         int j;
         boolean result = false;
-        points = CentralArea.CENTRAL_AREA.getCorners();
+        LngLat[] points = CentralArea.CENTRAL_AREA.getCorners();
         for (i = 0, j = points.length - 1; i < points.length; j = i++) {
-            if ((points[i].y > test.y) != (points[j].y > test.y) &&
-                    (test.x < (points[j].x - points[i].x) * (test.y - points[i].y) / (points[j].y-points[i].y) + points[i].x)) {
+            if ((points[i].lat() > this.lat()) != (points[j].lat() > this.lat()) &&
+                    (this.lng() < (points[j].lng() - points[i].lng()) * (this.lat() - points[i].lat()) / (points[j].lat()-points[i].lat()) + points[i].lng())) {
                 result = !result;
             }
         }

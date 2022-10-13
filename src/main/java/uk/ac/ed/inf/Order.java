@@ -1,10 +1,16 @@
 package uk.ac.ed.inf;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.IOException;
 import java.util.*;
 
 public class Order {
-    public Order(String orderNo, String orderDate, String customer, String creditCardNumber, String creditCardExpiry, String cvv, int priceTotalInPence, String[] orderItems) {
+    @JsonCreator
+    public Order(@JsonProperty("orderNo") String orderNo, @JsonProperty("orderDate") String orderDate, @JsonProperty("customer") String customer,
+                 @JsonProperty("creditCardNumber") String creditCardNumber, @JsonProperty("creditCardExpiry") String creditCardExpiry, @JsonProperty("cvv") String cvv,
+                 @JsonProperty("priceTotalInPence") int priceTotalInPence, @JsonProperty("orderItems") String[] orderItems) {
         this.orderNo = orderNo;
         this.orderDate = orderDate;
         this.customer = customer;
@@ -13,6 +19,38 @@ public class Order {
         this.cvv = cvv;
         this.priceTotalInPence = priceTotalInPence;
         this.orderItems = orderItems;
+    }
+
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    public String getOrderDate() {
+        return orderDate;
+    }
+
+    public String getCustomer() {
+        return customer;
+    }
+
+    public String getCreditCardNumber() {
+        return creditCardNumber;
+    }
+
+    public String getCreditCardExpiry() {
+        return creditCardExpiry;
+    }
+
+    public String getCvv() {
+        return cvv;
+    }
+
+    public int getPriceTotalInPence() {
+        return priceTotalInPence;
+    }
+
+    public String[] getOrderItems() {
+        return orderItems;
     }
 
     private final String orderNo;
@@ -79,10 +117,9 @@ public class Order {
     private boolean checkExpiryDate() {
         boolean checkLength = this.creditCardExpiry.length() == 5;
         if (checkLength) {
-            boolean checkFormat = this.creditCardExpiry.matches("(10|11|12|0[1-9])\\/(2[3-9]|[3-9][0-9])");  // Technically this will become wrong if we change centuries, but for the time being it is safer.
-                                                                                                                   // This is a reminder to change it if we get to that. Sorry 2300s developers, and hello from the past :)
+            return this.creditCardExpiry.matches("(10|11|12|0[1-9])\\/(2[3-9]|[3-9][0-9])");  // Technically this will become wrong if we change centuries, but for the time being it is safer.
+                                                                                                    // This is a reminder to change it if we get to that. Sorry 2300s developers, and hello from the past :)
             // No need to check for the edge case where we are in 2023 but before the service's starting date since it starts on January 1st :)
-            return checkFormat;
         } else return false;
     }
 

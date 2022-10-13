@@ -2,34 +2,29 @@ package uk.ac.ed.inf;
 
 import java.net.URL;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
 public class Restaurant {
-    public Restaurant(String name, double longitude, double latitude, Menu[] menu) {
+    @JsonCreator
+    public Restaurant(@JsonProperty("name") String name, @JsonProperty("longitude") double longitude, @JsonProperty("latitude") double latitude, @JsonProperty("menu") Menu[] menu) {
         this.name = name;
-        this.longitude = longitude;
-        this.latitude = latitude;
+        this.lnglat = new LngLat(longitude, latitude);
         this.menu = menu;
     }
 
     private final String name;
-    private final double longitude;
-    private final double latitude;
+    private final LngLat lnglat;
     private final Menu[] menu;
 
     public String getName() {
         return name;
     }
 
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
+    public LngLat getLnglat() { return lnglat; }
 
     public Menu[] getMenu() {
         return menu;

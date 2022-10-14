@@ -7,6 +7,17 @@ import java.io.IOException;
 import java.util.*;
 
 public class Order {
+    /**
+     * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
+     * @param orderNo               The order's identifier
+     * @param orderDate             The order's date
+     * @param customer              The customer's name
+     * @param creditCardNumber      The credit card number used to place the order
+     * @param creditCardExpiry      The expiry date of the credit card used to place the order
+     * @param cvv                   The CVV code of the credit card used to place the order
+     * @param priceTotalInPence     The total price of the order, plus the 1 pound delivery charge, in pence
+     * @param orderItems            The names of the pizzas included in the order
+     */
     @JsonCreator
     public Order(@JsonProperty("orderNo") String orderNo, @JsonProperty("orderDate") String orderDate, @JsonProperty("customer") String customer,
                  @JsonProperty("creditCardNumber") String creditCardNumber, @JsonProperty("creditCardExpiry") String creditCardExpiry, @JsonProperty("cvv") String cvv,
@@ -21,34 +32,58 @@ public class Order {
         this.orderItems = orderItems;
     }
 
+    /**
+     * @return orderNo
+     */
     public String getOrderNo() {
         return orderNo;
     }
 
+    /**
+     * @return orderDate
+     */
     public String getOrderDate() {
         return orderDate;
     }
 
+    /**
+     * @return customer
+     */
     public String getCustomer() {
         return customer;
     }
 
+    /**
+     * @return creditCardNumber
+     */
     public String getCreditCardNumber() {
         return creditCardNumber;
     }
 
+    /**
+     * @return creditCardExpiry
+     */
     public String getCreditCardExpiry() {
         return creditCardExpiry;
     }
 
+    /**
+     * @return cvv
+     */
     public String getCvv() {
         return cvv;
     }
 
+    /**
+     * @return priceTotalInPence
+     */
     public int getPriceTotalInPence() {
         return priceTotalInPence;
     }
 
+    /**
+     * @return orderItems
+     */
     public String[] getOrderItems() {
         return orderItems;
     }
@@ -62,6 +97,13 @@ public class Order {
     private final int priceTotalInPence;
     private final String[] orderItems;
 
+    /**
+     * Calculates the delivery cost given a list of restaurants and pizzas.
+     * @param restaurants   The restaurants considered
+     * @param pizzaNames    The names of the pizzas included
+     * @return              The sum of the prices of the pizzas, plus 1 pound delivery charge, in pence
+     * @throws InvalidPizzaCombination Thrown if invalid combination of pizzas/restaurants provided.
+     */
     public int getDeliveryCost(Restaurant[] restaurants, String... pizzaNames) throws InvalidPizzaCombination {
         if (!checkPizzaCombination(restaurants, pizzaNames)) {
             throw new InvalidPizzaCombination();
@@ -73,19 +115,16 @@ public class Order {
     private boolean checkPizzaCombination(Restaurant[] restaurants, String[] pizzaNames) {
         Set<String> orderItemsSet = new HashSet<>(Arrays.asList(pizzaNames));
 
-        List<Restaurant> restaurantList = Arrays.stream(restaurants)
-                .filter(restaurant -> {
+        return Arrays.stream(restaurants).anyMatch(restaurant -> {
                     Set<String> menuItemNames = new HashSet<>(Arrays.stream(restaurant.getMenu())
                             .map(Menu::getName)
                             .toList()); // create set of pizza names available at each restaurant
 
                     menuItemNames.retainAll(orderItemsSet); // find intersection between order and pizzas available (names)
 
-                    return menuItemNames.size() > 0; // discard any restaurant that we haven't ordered pizzas from
-                })
-                .toList();
+                    return menuItemNames.size() == orderItemsSet.size(); // if the order is valid, all pizzas must come from the same restaurant
+                });
 
-        return restaurantList.size() == 1; // make sure the order only has pizzas from exactly one restaurant
     }
 
     private int calcTotal(Restaurant[] restaurants, String[] pizzaNames) {
@@ -118,7 +157,7 @@ public class Order {
         boolean checkLength = this.creditCardExpiry.length() == 5;
         if (checkLength) {
             return this.creditCardExpiry.matches("(10|11|12|0[1-9])\\/(2[3-9]|[3-9][0-9])");  // Technically this will become wrong if we change centuries, but for the time being it is safer.
-                                                                                                    // This is a reminder to change it if we get to that. Sorry 2300s developers, and hello from the past :)
+                                                                                                    // This is a reminder to change it if we get to that. Sorry 2100s developers, and hello from the past :)
             // No need to check for the edge case where we are in 2023 but before the service's starting date since it starts on January 1st :)
         } else return false;
     }
@@ -171,7 +210,7 @@ public class Order {
             return false;
         }
 
-        return calcTotal(restaurants, this.orderItems) == this.priceTotalInPence;
+        return calcTotal(restaurants, this.orderItems) + 100 == this.priceTotalInPence;
     }
 
 }

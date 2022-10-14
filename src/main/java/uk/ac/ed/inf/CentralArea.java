@@ -22,6 +22,12 @@ public enum CentralArea {
         this.serverBaseAddress = serverBaseAddress;
     }
 
+    /**
+     * Gets the Singleton instance of CentralArea, fetches the relevant data and constructs the instance if not yet present in memory.
+     * @param serverBaseAddress     The base address of the REST service from which to fetch the data for the CentralArea instance.
+     * @return                      The Singleton instance of CentralArea representing the Central Campus area described in the specs.
+     * @throws IOException          Throws an IOException if there are any issues retrieving the data.
+     */
     public static CentralArea getInstance(URL serverBaseAddress) throws IOException {
         if (serverBaseAddress == null){
             serverBaseAddress = Constants.DEFAULT_BASE_ADDRESS;

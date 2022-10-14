@@ -9,6 +9,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 
 public class Restaurant {
+    /**
+     * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
+     * @param name          The name of the restaurant
+     * @param longitude     The longitude coordinate of the restaurant
+     * @param latitude      The latitutde coordinate of the restaurant
+     * @param menu          The menu of the restaurant: an array of Menu objects
+     */
     @JsonCreator
     public Restaurant(@JsonProperty("name") String name, @JsonProperty("longitude") double longitude, @JsonProperty("latitude") double latitude, @JsonProperty("menu") Menu[] menu) {
         this.name = name;
@@ -20,16 +27,31 @@ public class Restaurant {
     private final LngLat lnglat;
     private final Menu[] menu;
 
+    /**
+     * @return name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * @return lnglat   The restaurant's coordinates as a LngLat object
+     */
     public LngLat getLnglat() { return lnglat; }
 
+    /**
+     * @return menu
+     */
     public Menu[] getMenu() {
         return menu;
     }
 
+    /**
+     * Returns the current array of available restaurants from the 'restaurants/' endpoint of the given base address
+     * @param serverBaseAddress The base URL of the REST endpoint
+     * @return                  The available restaurants de-serialised as an array of Restaurant objects
+     * @throws IOException      In case there is an issue retrieving the data
+     */
     static Restaurant[] getRestaurantsFromRestServer(URL serverBaseAddress) throws IOException {
         return new ObjectMapper().readValue(new URL(serverBaseAddress + "restaurants/"), Restaurant[].class);
     }

@@ -26,6 +26,11 @@ public enum CmpDir {
         this.angle = angle;
     }
 
+    /**
+     * Returns a LngLat object whose coordinates when summed together with another LngLat object's coordinates would be equal to the coordinates we would
+     * end up at after moving from that other LngLat object's coordinates in the compass direction represented by this CmpDir instance.
+     * @return  The LngLat object representing the change in coordinates after moving in the direction represented by this CmpDir instance.
+     */
     public LngLat toLngLat(){
         double lng = Math.cos(Math.toRadians(this.angle));
         double lat = Math.sin(Math.toRadians(this.angle));

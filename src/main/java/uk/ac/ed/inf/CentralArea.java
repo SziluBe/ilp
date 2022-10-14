@@ -42,12 +42,12 @@ public enum CentralArea {
     }
 
     private static LngLat[] fetchCorners(URL serverBaseAddress) throws IOException {
-        final Location[] cornerLocations = new ObjectMapper().readValue(new URL(serverBaseAddress + "centralArea/"), Location[].class);
+        final NamedLocation[] cornerNamedLocations = new ObjectMapper().readValue(new URL(serverBaseAddress + "centralArea/"), NamedLocation[].class);
 
-        LngLat[] corners = new LngLat[cornerLocations.length];
+        LngLat[] corners = new LngLat[cornerNamedLocations.length];
 
-        for (int i = 0; i < cornerLocations.length; i++){
-            corners[i] = new LngLat(cornerLocations[i].longitude(), cornerLocations[i].latitude());
+        for (int i = 0; i < cornerNamedLocations.length; i++){
+            corners[i] = new LngLat(cornerNamedLocations[i].longitude(), cornerNamedLocations[i].latitude());
         }
 
         return corners;

@@ -140,6 +140,16 @@ public class Order {
                 .reduce(0, Integer::sum);
     }
 
+    private List<Menu> getAllMenuItems(Restaurant[] restaurants) {
+        return Arrays.stream(restaurants)
+                .map(Restaurant::getMenu) // map to Arrays
+                .map(Arrays::asList) // then to Lists
+                .reduce(new ArrayList<Menu>(), (runningList, newMenuArray) -> { // concatenate
+                    runningList.addAll(newMenuArray);
+                    return runningList;
+                });
+    }
+
 
 
 
@@ -169,16 +179,6 @@ public class Order {
     private boolean checkPizzaCount() {
         int l = this.orderItems.length;
         return 0 < l && l < 5;
-    }
-
-    private List<Menu> getAllMenuItems(Restaurant[] restaurants) {
-        return Arrays.stream(restaurants)
-                .map(Restaurant::getMenu) // map to Arrays
-                .map(Arrays::asList) // then to Lists
-                .reduce(new ArrayList<Menu>(), (runningList, newMenuArray) -> { // concatenate
-                    runningList.addAll(newMenuArray);
-                    return runningList;
-                });
     }
 
     private boolean checkPizzasDefined() throws IOException {

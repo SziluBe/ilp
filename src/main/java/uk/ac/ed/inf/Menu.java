@@ -14,7 +14,7 @@ public class Menu {
      * @param priceInPence The price of the menu item (pizza) in pence
      */
     @JsonCreator
-    public Menu(@JsonProperty("name") String name, @JsonProperty("priceInPence") int priceInPence) {
+    private Menu(@JsonProperty("name") String name, @JsonProperty("priceInPence") int priceInPence) {
         this.name = name;
         this.priceInPence = priceInPence;
     }

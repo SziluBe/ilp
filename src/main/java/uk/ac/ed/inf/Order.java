@@ -2,8 +2,10 @@ package uk.ac.ed.inf;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 public class Order {
@@ -29,7 +31,7 @@ public class Order {
      * @param orderItems        The names of the pizzas included in the order
      */
     @JsonCreator
-    public Order(@JsonProperty("orderNo") String orderNo, @JsonProperty("orderDate") String orderDate, @JsonProperty("customer") String customer,
+    private Order(@JsonProperty("orderNo") String orderNo, @JsonProperty("orderDate") String orderDate, @JsonProperty("customer") String customer,
                  @JsonProperty("creditCardNumber") String creditCardNumber, @JsonProperty("creditCardExpiry") String creditCardExpiry, @JsonProperty("cvv") String cvv,
                  @JsonProperty("priceTotalInPence") int priceTotalInPence, @JsonProperty("orderItems") String[] orderItems) {
         this.orderNo = orderNo;
@@ -150,6 +152,17 @@ public class Order {
                     runningList.addAll(newMenuArray);
                     return runningList;
                 });
+    }
+
+    /**
+     * Returns the current array of available orders from the 'orders/' endpoint of the given base address
+     *
+     * @param serverBaseAddress The base URL of the REST endpoint
+     * @return The existing orders de-serialised as an array of Order objects
+     * @throws IOException In case there is an issue retrieving the data
+     */
+    static Order[] getOrdersFromRestServer(URL serverBaseAddress) throws IOException {
+        return new ObjectMapper().readValue(new URL(serverBaseAddress + "orders/"), Order[].class);
     }
 
 

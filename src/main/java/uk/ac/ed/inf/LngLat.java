@@ -1,22 +1,44 @@
 package uk.ac.ed.inf;
 
+import java.util.ArrayList;
+
 public record LngLat(double lng, double lat) {
     /**
-     * Checks whether the point represented by the LngLat instance is within the Central Area or not.
+     * Checks whether the point represented by the LngLat instance is within the given Area or not.
      *
      * @return Return true if the point is inside, false otherwise
      */
-    public boolean inCentralArea() { // from https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    public boolean inArea(Area area) { // from https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
         int i;
         int j;
         boolean result = false;
-        LngLat[] points = CentralArea.CENTRAL_AREA.getCorners();
+        LngLat[] points = area.getVertices();
         for (i = 0, j = points.length - 1; i < points.length; j = i++) {
             if ((points[i].lat() > this.lat()) != (points[j].lat() > this.lat()) && (this.lng() < (points[j].lng() - points[i].lng()) * (this.lat() - points[i].lat()) / (points[j].lat() - points[i].lat()) + points[i].lng())) {
                 result = !result;
             }
         }
         return result;
+    }
+
+    public ArrayList<LngLat> verticesVisibleFrom(ArrayList<LngLat> vertices, Area[] areas) {
+        ArrayList<LngLat> verticesVisible = new ArrayList<>();
+        for (LngLat vertex : vertices) {
+            if (this.canSee(vertex, areas) && !this.equals(vertex)) {
+                verticesVisible.add(vertex);
+            }
+        }
+        return verticesVisible;
+    }
+
+    public boolean canSee(LngLat vertex, Area[] areas) {
+        // can see if there is no intersection with any of the no-fly zones
+        for (Area area : areas) {
+            if (new Edge(this, vertex).intersectsArea(area)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

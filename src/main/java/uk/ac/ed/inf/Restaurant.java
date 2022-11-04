@@ -17,11 +17,11 @@ public class Restaurant {
      *
      * @param name      The name of the restaurant
      * @param longitude The longitude coordinate of the restaurant
-     * @param latitude  The latitutde coordinate of the restaurant
+     * @param latitude  The latitude coordinate of the restaurant
      * @param menu      The menu of the restaurant: an array of Menu objects
      */
     @JsonCreator
-    public Restaurant(@JsonProperty("name") String name, @JsonProperty("longitude") double longitude, @JsonProperty("latitude") double latitude, @JsonProperty("menu") Menu[] menu) {
+    private Restaurant(@JsonProperty("name") String name, @JsonProperty("longitude") double longitude, @JsonProperty("latitude") double latitude, @JsonProperty("menu") Menu[] menu) {
         this.name = name;
         this.lnglat = new LngLat(longitude, latitude);
         this.menu = menu;

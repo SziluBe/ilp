@@ -16,11 +16,12 @@ public enum CmpDir {
     S(12 * 22.5),
     SSE(13 * 22.5),
     SE(14 * 22.5),
-    ESE(15 * 22.5);
+    ESE(15 * 22.5),
+    HOVER(Constants.HOVER_ANGLE);
 
     private final double angle;
 
-    CmpDir(double angle) {
+    CmpDir(Double angle) {
         this.angle = angle;
     }
 
@@ -31,8 +32,12 @@ public enum CmpDir {
      * @return The LngLat object representing the change in coordinates after moving in the direction represented by this CmpDir instance.
      */
     public LngLat toLngLat() {
-        double lng = Math.cos(Math.toRadians(this.angle));
-        double lat = Math.sin(Math.toRadians(this.angle));
+        if (this == HOVER) {
+            return new LngLat(0, 0);
+        }
+
+        double lng = Math.cos(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;
+        double lat = Math.sin(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;
 
         return new LngLat(lng, lat);
     }

@@ -1,8 +1,8 @@
 package uk.ac.ed.inf;
 
-import java.util.*;
+import java.util.*; // TODO: maybe limit imports
 
-public class Path {
+public class Path { // TODO: refactor
     // A* algorithm pseudocode
     //        function reconstruct_path(cameFrom, current)
     //        total_path := {current}
@@ -64,13 +64,15 @@ public class Path {
         return totalPath;
     }
 
-    static ArrayList<LngLat> findPath(LngLat start, LngLat goal, Area[] noFlyZones) {
+    // Set wayPointMode to true to find waypoints
+    // Set it to false and pass the current location as start, and the next location as goal
+    static ArrayList<LngLat> findPath(LngLat start, LngLat goal, Area[] noFlyZones, Area centralArea, boolean wayPointMode) {
         // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from start
         // to n currently known.
-        HashMap<LngLat, LngLat> cameFrom = new HashMap<>();
+        var cameFrom = new HashMap<LngLat, LngLat>();
 
         // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
-        HashMap<LngLat, Double> gScore = new HashMap<>();
+        var gScore = new HashMap<LngLat, Double>();
         gScore.put(start, 0.0);
 
         // The set of discovered nodes that may need to be (re-)expanded.
@@ -81,8 +83,8 @@ public class Path {
 
         // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
         // how cheap a path could be from start to finish if it goes through n.
-        HashMap<LngLat, Double> fScore = new HashMap<>();
-        fScore.put(start, start.distanceTo(goal));
+        // HashMap<LngLat, Double> fScore = new HashMap<>();
+        // fScore.put(start, start.distanceTo(goal));
 
         // all noFlyZones vertices
         ArrayList<LngLat> allVertices = new ArrayList<>();
@@ -91,23 +93,55 @@ public class Path {
         }
         allVertices.add(goal);
 
+        var neighbors = new ArrayList<LngLat>();
+        var centralRevisitPenalty = 0.0;
+        var noFlyZonePenalty = 0.0;
+        var beenToCentral = false;
+
         while (!openSet.isEmpty()) {
             // This operation can occur in O(Log(N)) time if openSet is a min-heap or a priority queue
-            LngLat current = openSet.poll();
-            if (current.equals(goal)) {
+            var current = openSet.poll();
+            if (current.equals(goal) || (!wayPointMode && current.closeTo(goal))) {
                 return reconstructPath(current, cameFrom);
+            }
+            if (current.inArea(centralArea)) {
+                beenToCentral = true;
             }
 
             openSet.remove(current);
-            for (LngLat neighbor : current.verticesVisibleFrom(allVertices, noFlyZones)) {
+
+            if (wayPointMode) {
+                neighbors = current.verticesVisibleFrom(allVertices, noFlyZones);
+            }
+            else {
+                // TODO: reorder this list based on the slope of the line between current and goal
+                // in fact, adjacentLngLats should take a slope parameter, and return the list of vertices
+                // sorted by the angle between the line between current and goal, and the line between current and the vertex
+                neighbors = current.adjacentLngLats();
+            }
+
+            for (LngLat neighbor : neighbors) {
                 // d(current,neighbor) is the weight of the edge from current to neighbor
                 // tentative_gScore is the distance from start to the neighbor through current
-                double tentative_gScore = gScore.get(current) + current.distanceTo(neighbor);
+                centralRevisitPenalty = 0.0;
+                noFlyZonePenalty = 0.0;
+
+                if (beenToCentral && !current.inArea(centralArea) && neighbor.inArea(centralArea)) {
+                    centralRevisitPenalty = Double.POSITIVE_INFINITY;
+                }
+
+                for (Area noFlyZone : noFlyZones) {
+                     if (neighbor.inArea(noFlyZone)) {
+                        noFlyZonePenalty = Double.POSITIVE_INFINITY;
+                    }
+                }
+
+                var tentative_gScore = gScore.get(current) + current.distanceTo(neighbor) + centralRevisitPenalty + noFlyZonePenalty;
                 if (tentative_gScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
                     // This path to neighbor is better than any previous one. Record it!
                     cameFrom.put(neighbor, current);
                     gScore.put(neighbor, tentative_gScore);
-                    fScore.put(neighbor, tentative_gScore + neighbor.distanceTo(goal));
+                    // fScore.put(neighbor, tentative_gScore + neighbor.distanceTo(goal));
                     if (!openSet.contains(neighbor)) {
                         openSet.add(neighbor);
                     }

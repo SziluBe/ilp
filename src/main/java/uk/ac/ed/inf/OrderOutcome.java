@@ -10,5 +10,5 @@ public enum OrderOutcome {
     InvalidPizzaNotDefined,
     InvalidPizzaCount,
     InvalidPizzaCombinationMultipleSuppliers,
-    Invalid
+    Invalid // TODO: for when the order can't be parsed?
 }

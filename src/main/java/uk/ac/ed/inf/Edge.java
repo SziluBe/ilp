@@ -29,7 +29,7 @@ public record Edge(LngLat start, LngLat end) {
         if (Arrays.stream(vertices).noneMatch(v -> v.equals(this.start) || v.equals(this.end))) {
             return false;
         }
-        // TODO: fix for concave polygons
+        // TODO: fix for concave polygons (or convex hull if that fails..)
         if (verticesSet.contains(this.start) && verticesSet.contains(this.end) && edges.stream().noneMatch(e -> (e.start.equals(this.start) && e.end.equals(this.end)) || (e.start.equals(this.end) && e.end.equals(this.start)))) {
             return true;
         }

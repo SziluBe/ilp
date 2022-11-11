@@ -28,7 +28,7 @@ public class AppTest
     }
 
     @Test
-    public void pathTest() {
+    public void pathTest() throws IOException {
         URL url3;
         try {
             url3 = new URL("https://ilp-rest.azurewebsites.net/");
@@ -74,7 +74,8 @@ public class AppTest
         System.out.println(fc3.toJson());
 
         System.out.println("path");
-        ArrayList<LngLat> path = Path.findPath(AT,restaurant,areas);
+        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        ArrayList<LngLat> path = Path.findPath(AT,restaurant,areas, centralArea,true);
         System.out.println(path.size());
         for (LngLat point : path) {
             System.out.println(point.toString());
@@ -91,29 +92,36 @@ public class AppTest
         System.out.println(featureCollection.toJson());
     }
 
-//    @Test
-//    public void outsidenotInCentral()
-//    {
-//        assertFalse(new LngLat(-4.188, 55.944).inCentralArea());
-//    }
-//
-//    @Test
-//    public void cornerNotInCentral()
-//    {
-//        assertFalse(new LngLat(-3.192473, 55.946233).inCentralArea());
-//    }
-//
-//    @Test
-//    public void edgeNotInCentral()
-//    {
-//        assertFalse(new LngLat(-3.188, 55.946233).inCentralArea());
-//    }
-//
-//    @Test
-//    public void insideInCentral()
-//    {
-//        assertTrue(new LngLat(-3.188, 55.944).inCentralArea());
-//    }
+    @Test
+    public void outsidenotInCentral() throws IOException {
+        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        assertFalse(new LngLat(-4.188, 55.944).inArea(centralArea));
+    }
+
+    @Test
+    public void cornerNotInCentral() throws IOException {
+        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        assertFalse(new LngLat(-3.192473, 55.946233).inArea(centralArea));
+    }
+
+    @Test
+    public void edgeNotInCentral() throws IOException {
+        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        assertFalse(new LngLat(-3.188, 55.946233).inArea(centralArea));
+    }
+
+    @Test
+    public void insideInCentral() throws IOException {
+        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        assertTrue(new LngLat(-3.188, 55.944).inArea(centralArea));
+    }
+
+    @Test
+    public void checkCentralAreaDeSerialisation() throws IOException {
+        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        System.out.println(centralArea);
+        assertEquals(4, centralArea.getVertices().length);
+    }
 
     @Test
     public void checkRestaurantDeSerialisation() throws IOException { // also tests Menu serialisation
@@ -128,13 +136,22 @@ public class AppTest
     @Test
     public void checkOrderDeSerialisationAndDeliveryCost() throws IOException, InvalidPizzaCombination {
         Order[] orders = new ObjectMapper().readValue(new URL(Constants.DEFAULT_BASE_ADDRESS + "orders/"), Order[].class);
-        assertEquals(2600, orders[0].getDeliveryCost(Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS), orders[0].getOrderItems()));
+        assertEquals(2600, orders[0].getDeliveryCost(Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS)));
     }
 
     @Test
     public void checkDistanceTo() {
         assertTrue(new LngLat(-3.192473, 55.946233).distanceTo(new LngLat(-3.184319, 55.942617)) > 3.192473 - 3.184319);
     }
+
+//    @Test // removed static method after testing
+//    public void checkCardValid() {
+//        // visa, mastercard, amex
+//        String[] validCards = {"4111111111111111", "5555555555554444", "371449635398431"};
+//        for (String card : validCards) {
+//            assertTrue(Order.cardValid(card));
+//        }
+//    }
 
 //    @Test // we want the pizza combination method private, so we exclude this test after running it once
 //    public void checkOrderSerialisationAndCombination() throws IOException, InvalidPizzaCombination {

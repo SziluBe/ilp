@@ -17,6 +17,7 @@ public class Order {
     private final String cvv;
     private final int priceTotalInPence;
     private final String[] orderItems;
+    private boolean delivered;
 
     /**
      * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
@@ -33,7 +34,7 @@ public class Order {
     @JsonCreator
     private Order(@JsonProperty("orderNo") String orderNo, @JsonProperty("orderDate") String orderDate, @JsonProperty("customer") String customer,
                  @JsonProperty("creditCardNumber") String creditCardNumber, @JsonProperty("creditCardExpiry") String creditCardExpiry, @JsonProperty("cvv") String cvv,
-                 @JsonProperty("priceTotalInPence") int priceTotalInPence, @JsonProperty("orderItems") String[] orderItems) {
+                 @JsonProperty("priceTotalInPence") int priceTotalInPence, @JsonProperty("orderItems") String[] orderItems) throws IOException {
         this.orderNo = orderNo;
         this.orderDate = orderDate;
         this.customer = customer;
@@ -42,6 +43,21 @@ public class Order {
         this.cvv = cvv;
         this.priceTotalInPence = priceTotalInPence;
         this.orderItems = orderItems;
+        this.delivered = false;
+    }
+
+    /**
+     * @return Whether the order has been delivered
+     */
+    public boolean isDelivered() {
+        return delivered;
+    }
+
+    /**
+     * @param delivered Whether the order has been delivered
+     */
+    public void setDelivered(boolean delivered) {
+        this.delivered = delivered;
     }
 
     /**
@@ -100,24 +116,66 @@ public class Order {
         return orderItems;
     }
 
+    public OrderOutcome validateOrder() throws IOException {
+        Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+
+        if (!this.checkCardNumber()) {
+            return OrderOutcome.InvalidCardNumber;
+        }
+        if (!this.checkExpiryDate()) {
+            return OrderOutcome.InvalidExpiryDate;
+        }
+        if (!this.checkCvv()) {
+            return OrderOutcome.InvalidCvv;
+        }
+        if (!this.checkTotal(restaurants)) {
+            return OrderOutcome.InvalidTotal;
+        }
+        if (!this.checkPizzasDefined(restaurants)) {
+            return OrderOutcome.InvalidPizzaNotDefined;
+        }
+        if (!this.checkPizzaCount()) {
+            return OrderOutcome.InvalidPizzaCount;
+        }
+        if (!this.checkPizzaCombination(restaurants)) {
+            return OrderOutcome.InvalidPizzaCombinationMultipleSuppliers;
+        }
+
+        if (this.delivered) {
+            return OrderOutcome.Delivered;
+        }
+        return OrderOutcome.ValidButNotDelivered;
+    }
+
     /**
      * Calculates the delivery cost given a list of restaurants and pizzas.
      *
      * @param restaurants The restaurants considered
-     * @param pizzaNames  The names of the pizzas included
      * @return The sum of the prices of the pizzas, plus 1 pound delivery charge, in pence
      * @throws InvalidPizzaCombination Thrown if invalid combination of pizzas/restaurants provided.
      */
-    public int getDeliveryCost(Restaurant[] restaurants, String... pizzaNames) throws InvalidPizzaCombination {
-        if (!checkPizzaCombination(restaurants, pizzaNames)) {
+    public int getDeliveryCost(Restaurant[] restaurants) throws InvalidPizzaCombination {
+        try { // Make sure we don't crash if we somehow get a null value in restaurants
+            assert restaurants != null;
+        } catch (AssertionError e) {
+            return -1;
+        }
+
+        if (!checkPizzaCombination(restaurants)) {
             throw new InvalidPizzaCombination();
         } // no need for `else` since we are throwing an exception in the body of the if statement
 
-        return calcTotal(restaurants, pizzaNames) + Constants.DELIVERY_CHARGE;
+        return calcTotal(restaurants) + Constants.DELIVERY_CHARGE;
     }
 
-    private boolean checkPizzaCombination(Restaurant[] restaurants, String[] pizzaNames) {
-        Set<String> orderItemsSet = new HashSet<>(Arrays.asList(pizzaNames));
+    private boolean checkPizzaCombination(Restaurant[] restaurants) {
+        Set<String> orderItemsSet = new HashSet<>(Arrays.asList(this.orderItems));
+
+        try { // Make sure we don't crash if we somehow get a null value in restaurants
+            assert restaurants != null;
+        } catch (AssertionError e) {
+            return false;
+        }
 
         return Arrays.stream(restaurants).anyMatch(restaurant -> {
             Set<String> menuItemNames = new HashSet<>(Arrays.stream(restaurant.getMenu())
@@ -131,10 +189,10 @@ public class Order {
 
     }
 
-    private int calcTotal(Restaurant[] restaurants, String[] pizzaNames) {
+    private int calcTotal(Restaurant[] restaurants) {
         List<Menu> allMenuItems = getAllMenuItems(restaurants);
 
-        Set<String> pizzaNamesSet = new HashSet<>(Arrays.asList(pizzaNames)); // for faster lookup
+        Set<String> pizzaNamesSet = new HashSet<>(Arrays.asList(this.orderItems)); // for faster lookup
 
         return allMenuItems.stream()
                 .filter(menuItem -> { // filter for pizzas whose name appears in the list of names
@@ -165,13 +223,36 @@ public class Order {
         return new ObjectMapper().readValue(new URL(serverBaseAddress + "orders/"), Order[].class);
     }
 
+    /**
+     * Returns the current array of available orders on a given date from the 'orders/YYYY-MM-DD' endpoint of the given base address
+     *
+     * @param serverBaseAddress The base URL of the REST endpoint
+     * @return The existing orders de-serialised as an array of Order objects
+     * @throws IOException In case there is an issue retrieving the data
+     */
+    static Order[] getOrdersFromRestServerByDate(URL serverBaseAddress, String date) throws IOException {
+        return new ObjectMapper().readValue(new URL(serverBaseAddress + "orders/" + date), Order[].class);
+    }
+
 
     // stuff that'll probably be useful later
+    // card checking using Luhn algorithm
     private boolean checkCardNumber() {
-        boolean checkOnlyDigits = this.creditCardNumber.matches("[0-9]+");
-        boolean checkLength = this.creditCardNumber.length() == 16;
-
-        return checkOnlyDigits && checkLength;
+        int sum = 0;
+        boolean alternate = false;
+        for (int i = this.creditCardNumber.length() - 1; i >= 0; i--) {
+            int n = Integer.parseInt(this.creditCardNumber.substring(i, i + 1));
+            if (alternate) {
+                n *= 2;
+                if (n > 9) {
+                    n = (n % 10) + 1;
+                }
+            }
+            sum += n;
+            alternate = !alternate;
+        }
+        // 13/16 for Visa, 15 for Amex, 16 for Mastercard
+        return (sum % 10 == 0) && (this.creditCardNumber.length() == 16 || this.creditCardNumber.length() == 13 || this.creditCardNumber.length() == 15);
     }
 
     private boolean checkExpiryDate() {
@@ -183,7 +264,7 @@ public class Order {
         } else return false;
     }
 
-    private boolean checkCVV() {
+    private boolean checkCvv() {
         return this.cvv.matches("[0-9]{3}");
     }
 
@@ -192,9 +273,7 @@ public class Order {
         return 0 < l && l < 5;
     }
 
-    private boolean checkPizzasDefined() throws IOException {
-        // TODO: change address in CW2
-        Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+    private boolean checkPizzasDefined(Restaurant[] restaurants) throws IOException {
         try { // Make sure we don't crash if we somehow get a null value in restaurants
             assert restaurants != null;
         } catch (AssertionError e) {
@@ -211,17 +290,15 @@ public class Order {
                 .allMatch(allMenuNames::contains); // ensure every pizza name in the order is present in at least one restaurant's menu
     }
 
-    private boolean checkTotal() throws IOException {
+    private boolean checkTotal(Restaurant[] restaurants) throws IOException {
         // difficult to remove code duplication and also retain readability due to the try-catch, I think the code is least confusing kept this way
-        // TODO: change address in CW2
-        Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
         try { // Make sure we don't crash if we somehow get a null value in restaurants
             assert restaurants != null;
         } catch (AssertionError e) {
             return false;
         }
 
-        return calcTotal(restaurants, this.orderItems) + 100 == this.priceTotalInPence;
+        return calcTotal(restaurants) + 100 == this.priceTotalInPence;
     }
 
 }

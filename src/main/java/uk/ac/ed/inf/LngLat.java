@@ -41,6 +41,19 @@ public record LngLat(double lng, double lat) {
         return true;
     }
 
+
+    // TODO: ordered adjacentLngLats: reorder this list based on the slope of the line between current and goal
+    // in fact, adjacentLngLats should take a slope parameter, and return the list of vertices
+    // sorted by the angle between the line between current and goal, and the line between current and the vertex
+    public ArrayList<LngLat> adjacentLngLats() {
+        // add a lnglat for each cmpdir
+        ArrayList<LngLat> adjacentLngLats = new ArrayList<>();
+        for (CmpDir cmpDir : CmpDir.values()) {
+            adjacentLngLats.add(this.add(cmpDir.toLngLat()));
+        }
+        return adjacentLngLats;
+    }
+
     /**
      * Calculates the Euclidean distance between the point represented by this LngLat instance, and the point represented by the LngLat instance passed in as a parameter.
      *

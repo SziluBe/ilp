@@ -2,7 +2,6 @@ package uk.ac.ed.inf;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -116,8 +115,8 @@ public class Order {
         return orderItems;
     }
 
-    public OrderOutcome validateOrder() throws IOException {
-        Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+    public OrderOutcome validateOrder(URL serverBaseAddress) throws IOException {
+        Restaurant[] restaurants = Restaurant.getRestaurants(serverBaseAddress);
 
         if (!this.checkCardNumber()) {
             return OrderOutcome.InvalidCardNumber;
@@ -220,7 +219,7 @@ public class Order {
      * @throws IOException In case there is an issue retrieving the data
      */
     static Order[] getOrdersFromRestServer(URL serverBaseAddress) throws IOException {
-        return new ObjectMapper().readValue(new URL(serverBaseAddress + "orders/"), Order[].class);
+        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "orders/"), Order[].class);
     }
 
     /**
@@ -231,7 +230,7 @@ public class Order {
      * @throws IOException In case there is an issue retrieving the data
      */
     static Order[] getOrdersFromRestServerByDate(URL serverBaseAddress, String date) throws IOException {
-        return new ObjectMapper().readValue(new URL(serverBaseAddress + "orders/" + date), Order[].class);
+        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "orders/" + date), Order[].class);
     }
 
 

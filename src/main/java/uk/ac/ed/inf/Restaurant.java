@@ -2,7 +2,6 @@ package uk.ac.ed.inf;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -11,6 +10,8 @@ public class Restaurant {
     private final String name;
     private final LngLat lnglat;
     private final Menu[] menu;
+    private static Restaurant[] restaurants;
+    private static URL baseAddress;
 
     /**
      * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
@@ -34,8 +35,20 @@ public class Restaurant {
      * @return The available restaurants de-serialised as an array of Restaurant objects
      * @throws IOException In case there is an issue retrieving the data
      */
-    static Restaurant[] getRestaurantsFromRestServer(URL serverBaseAddress) throws IOException {
-        return new ObjectMapper().readValue(new URL(serverBaseAddress + "restaurants/"), Restaurant[].class);
+    private static Restaurant[] getRestaurantsFromRestServer(URL serverBaseAddress) throws IOException {
+        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "restaurants/"), Restaurant[].class);
+    }
+
+    public static Restaurant[] getRestaurants(URL serverBaseAddress) throws IOException {
+        if (restaurants == null) {
+            restaurants = getRestaurantsFromRestServer(serverBaseAddress);
+            baseAddress = serverBaseAddress;
+        }
+        else if (!serverBaseAddress.equals(baseAddress)) {
+            // TODO: is err the right place to print this?
+            System.err.println("Warning: Restaurants base address has changed from " + baseAddress + " to " + serverBaseAddress + ", but restaurants have already been fetched. This may cause unexpected behaviour.");
+        }
+        return restaurants;
     }
 
     /**

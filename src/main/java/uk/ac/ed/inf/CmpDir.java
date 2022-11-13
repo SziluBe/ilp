@@ -19,7 +19,7 @@ public enum CmpDir {
     ESE(15 * 22.5),
     HOVER(Constants.HOVER_ANGLE);
 
-    private final double angle;
+    private final Double angle;
 
     CmpDir(Double angle) {
         this.angle = angle;

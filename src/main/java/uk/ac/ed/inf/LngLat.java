@@ -49,7 +49,10 @@ public record LngLat(double lng, double lat) {
         // add a lnglat for each cmpdir
         ArrayList<LngLat> adjacentLngLats = new ArrayList<>();
         for (CmpDir cmpDir : CmpDir.values()) {
-            adjacentLngLats.add(this.add(cmpDir.toLngLat()));
+            // if not hover
+            if (!cmpDir.equals(CmpDir.HOVER)) {
+                adjacentLngLats.add(this.add(cmpDir.toLngLat()));
+            }
         }
         return adjacentLngLats;
     }

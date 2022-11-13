@@ -16,15 +16,76 @@ import static org.junit.Assert.*;
 /**
  * Unit test for simple App.
  */
-public class AppTest 
-{
+public class AppTest {
     /**
      * Rigorous Test :-)
      */
     @Test
-    public void shouldAnswerWithTrue()
-    {
-        assertTrue( true );
+    public void shouldAnswerWithTrue() {
+        assertTrue(true);
+    }
+
+    @Test
+    public void testGenerateGeojsons() throws IOException {
+        Restaurant[] restaurants = Restaurant.getRestaurants(Constants.DEFAULT_BASE_ADDRESS);
+        var restaurantLocations = new ArrayList<LngLat>();
+        for (Restaurant restaurant : restaurants) {
+            restaurantLocations.add(restaurant.getLnglat());
+        }
+
+        Area[] noFlyZones = Area.getNoFlyZones(Constants.DEFAULT_BASE_ADDRESS);
+        Area centralArea = Area.getCentralArea(Constants.DEFAULT_BASE_ADDRESS);
+
+        var waypointPaths = new ArrayList<ArrayList<LngLat>>();
+        for (LngLat restaurantLocation : restaurantLocations) {
+            waypointPaths.add(Path.findPath(Constants.AT, restaurantLocation, noFlyZones, centralArea, true));
+        }
+
+        // generate geojson for each waypoint path
+        for (int i = 0; i < waypointPaths.size(); i++) {
+            var waypointPath = waypointPaths.get(i);
+            List<Point> waypointPathPoints = new ArrayList<>();
+            for (LngLat waypoint : waypointPath) {
+                waypointPathPoints.add(Point.fromLngLat(waypoint.lng(), waypoint.lat()));
+            }
+            FeatureCollection waypointPathGeojson = FeatureCollection.fromFeatures(new Feature[] {Feature.fromGeometry(LineString.fromLngLats(waypointPathPoints))});
+            // print
+            String waypointPathGeojsonString = waypointPathGeojson.toJson();
+            System.out.println(waypointPathGeojsonString);
+        }
+
+        // generate flightpath for each waypoint path
+        var flightPaths = new ArrayList<ArrayList<LngLat>>();
+        int counter = 0;
+        for (ArrayList<LngLat> waypointPath : waypointPaths) {
+            if (counter == 2) { // TODO: A* on steps is too slow >:(
+                counter++;
+                continue;
+            }
+            var flightPath = new ArrayList<LngLat>();
+            for (int i = 0; i < waypointPath.size() - 1; i++) {
+                var p = Path.findPath(waypointPath.get(i), waypointPath.get(i + 1), noFlyZones, centralArea, false);
+                flightPath.addAll(p);
+            }
+            flightPaths.add(flightPath);
+            counter++;
+        }
+
+        System.out.println(flightPaths.size());
+
+        // generate geojson for each flightpath
+        for (ArrayList<LngLat> flightPath : flightPaths) {
+            List<Point> flightPathPoints = new ArrayList<>();
+            for (LngLat waypoint : flightPath) {
+                flightPathPoints.add(Point.fromLngLat(waypoint.lng(), waypoint.lat()));
+            }
+            FeatureCollection flightPathGeojson = FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(LineString.fromLngLats(flightPathPoints))});
+            // print
+            String flightPathGeojsonString = flightPathGeojson.toJson();
+            System.out.println(flightPathGeojsonString);
+        }
+
+        System.out.println("done");
     }
 
     @Test
@@ -37,7 +98,7 @@ public class AppTest
         }
         Area[] areas;
         try {
-            areas = Area.getNoFlyZonesFromRestServer(url3);
+            areas = Area.getNoFlyZones(url3);
 //            System.out.println(Arrays.toString(areas));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -74,7 +135,7 @@ public class AppTest
         System.out.println(fc3.toJson());
 
         System.out.println("path");
-        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        Area centralArea = Area.getCentralArea(Constants.DEFAULT_BASE_ADDRESS);
         ArrayList<LngLat> path = Path.findPath(AT,restaurant,areas, centralArea,true);
         System.out.println(path.size());
         for (LngLat point : path) {
@@ -94,38 +155,38 @@ public class AppTest
 
     @Test
     public void outsidenotInCentral() throws IOException {
-        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        Area centralArea = Area.getCentralArea(Constants.DEFAULT_BASE_ADDRESS);
         assertFalse(new LngLat(-4.188, 55.944).inArea(centralArea));
     }
 
     @Test
     public void cornerNotInCentral() throws IOException {
-        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        Area centralArea = Area.getCentralArea(Constants.DEFAULT_BASE_ADDRESS);
         assertFalse(new LngLat(-3.192473, 55.946233).inArea(centralArea));
     }
 
     @Test
     public void edgeNotInCentral() throws IOException {
-        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        Area centralArea = Area.getCentralArea(Constants.DEFAULT_BASE_ADDRESS);
         assertFalse(new LngLat(-3.188, 55.946233).inArea(centralArea));
     }
 
     @Test
     public void insideInCentral() throws IOException {
-        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        Area centralArea = Area.getCentralArea(Constants.DEFAULT_BASE_ADDRESS);
         assertTrue(new LngLat(-3.188, 55.944).inArea(centralArea));
     }
 
     @Test
     public void checkCentralAreaDeSerialisation() throws IOException {
-        Area centralArea = Area.getCentralAreaFromRestServer(Constants.DEFAULT_BASE_ADDRESS);
+        Area centralArea = Area.getCentralArea(Constants.DEFAULT_BASE_ADDRESS);
         System.out.println(centralArea);
         assertEquals(4, centralArea.getVertices().length);
     }
 
     @Test
     public void checkRestaurantDeSerialisation() throws IOException { // also tests Menu serialisation
-        assertTrue(Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS).length > 0);
+        assertTrue(Restaurant.getRestaurants(Constants.DEFAULT_BASE_ADDRESS).length > 0);
     }
 
     @Test
@@ -136,7 +197,7 @@ public class AppTest
     @Test
     public void checkOrderDeSerialisationAndDeliveryCost() throws IOException, InvalidPizzaCombination {
         Order[] orders = new ObjectMapper().readValue(new URL(Constants.DEFAULT_BASE_ADDRESS + "orders/"), Order[].class);
-        assertEquals(2600, orders[0].getDeliveryCost(Restaurant.getRestaurantsFromRestServer(Constants.DEFAULT_BASE_ADDRESS)));
+        assertEquals(2600, orders[0].getDeliveryCost(Restaurant.getRestaurants(Constants.DEFAULT_BASE_ADDRESS)));
     }
 
     @Test

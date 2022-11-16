@@ -66,7 +66,7 @@ public class Path { // TODO: refactor
 
     // Set wayPointMode to true to find waypoints
     // Set it to false and pass the current location as start, and the next location as goal
-    static ArrayList<LngLat> findPath(LngLat start, LngLat goal, Area[] noFlyZones, Area centralArea, boolean wayPointMode) {
+    static ArrayList<LngLat> findPath(LngLat start, LngLat goal, Area[] noFlyZones, Area centralArea, boolean wayPointMode, boolean weighted) {
         // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from start
         // to n currently known.
         var cameFrom = new HashMap<LngLat, LngLat>();
@@ -78,7 +78,13 @@ public class Path { // TODO: refactor
         // The set of discovered nodes that may need to be (re-)expanded.
         // Initially, only the start node is known.
         // This is usually implemented as a min-heap or priority queue rather than a hash-set.
-        PriorityQueue<LngLat> openSet = new PriorityQueue<>(Comparator.comparingDouble(v -> gScore.get(v) + v.distanceTo(goal)));
+        // Remaining distance needs to be weighted higher so we don't end up doing something close to a breadth first search
+        PriorityQueue<LngLat> openSet;
+        if (weighted) {
+             openSet = new PriorityQueue<>(Comparator.comparingDouble(v -> gScore.get(v) + 2 * v.distanceTo(goal)));
+        } else {
+            openSet = new PriorityQueue<>(Comparator.comparingDouble(v -> gScore.get(v) + v.distanceTo(goal)));
+        }
         openSet.add(start);
 
         // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
@@ -94,21 +100,31 @@ public class Path { // TODO: refactor
         allVertices.add(goal);
 
         var neighbors = new ArrayList<LngLat>();
-        var centralRevisitPenalty = 0.0;
-        var noFlyZonePenalty = 0.0;
-        var beenToCentral = false;
+        double centralRevisitPenalty;
+        double noFlyZonePenalty;
+        boolean beenToCentral = false;
 
-        while (!openSet.isEmpty()) {
+        int outerIterations = 0;
+        int iters = 0;
+        long avgDuration = 0;
+        int avgOpenSetSize = 0;
+
+        while (!openSet.isEmpty()) { // too many iterations here
+            long startTime = System.nanoTime();
+            outerIterations++;
             // This operation can occur in O(Log(N)) time if openSet is a min-heap or a priority queue
             var current = openSet.poll();
+            assert current != null; // we don't add null to openSet, nor do we start an iteration with an empty openSet
             if (current.equals(goal) || (!wayPointMode && current.closeTo(goal))) {
+                System.out.println("Outer iterations: " + outerIterations);
+                System.out.println("Iterations: " + iters);
+                System.out.println("Avg duration: " + avgDuration);
+                System.out.println("Avg open set size: " + avgOpenSetSize);
                 return reconstructPath(current, cameFrom);
             }
             if (current.inArea(centralArea)) {
                 beenToCentral = true;
             }
-
-            openSet.remove(current);
 
             if (wayPointMode) {
                 neighbors = current.verticesVisibleFrom(allVertices, noFlyZones);
@@ -121,6 +137,7 @@ public class Path { // TODO: refactor
             }
 
             for (LngLat neighbor : neighbors) {
+                iters++;
                 // d(current,neighbor) is the weight of the edge from current to neighbor
                 // tentative_gScore is the distance from start to the neighbor through current
                 centralRevisitPenalty = 0.0;
@@ -137,6 +154,9 @@ public class Path { // TODO: refactor
                 }
 
                 var tentative_gScore = gScore.get(current) + current.distanceTo(neighbor) + centralRevisitPenalty + noFlyZonePenalty;
+//                if (greedy) {
+//                var tentative_gScore = current.distanceTo(neighbor);
+//                }
                 if (tentative_gScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
                     // This path to neighbor is better than any previous one. Record it!
                     cameFrom.put(neighbor, current);
@@ -147,9 +167,16 @@ public class Path { // TODO: refactor
                     }
                 }
             }
+            long endTime = System.nanoTime();
+            avgDuration = (long) ((avgDuration * (outerIterations - 1) + (endTime - startTime)) / outerIterations);
+            avgOpenSetSize = (int) ((avgOpenSetSize * (outerIterations - 1) + openSet.size()) / outerIterations);
         }
 
         // Open set is empty but goal was never reached
+        System.out.println("Outer iterations: " + outerIterations);
+        System.out.println("Iterations: " + iters);
+        System.out.println("Avg duration: " + avgDuration);
+        System.out.println("Avg open set size: " + avgOpenSetSize);
         return null;
     }
 }

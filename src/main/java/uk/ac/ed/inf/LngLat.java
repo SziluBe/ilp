@@ -92,9 +92,6 @@ public record LngLat(double lng, double lat) {
     }
 
     private LngLat add(LngLat otherLngLat) {
-        double lngDelta = otherLngLat.lng();
-        double latDelta = otherLngLat.lat();
-
         return new LngLat(this.lng() + otherLngLat.lng(), this.lat() + otherLngLat.lat());
     }
 }

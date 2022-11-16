@@ -4,15 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb7dc8e7-b36c-4d5a-ae87-fd1f150579b7" name="Changes" comment="lots of wololo">
+    <list default="true" id="fb7dc8e7-b36c-4d5a-ae87-fd1f150579b7" name="Changes" comment="asdfg">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Area.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Area.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/CmpDir.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/CmpDir.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Constants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/LngLat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/LngLat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Order.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Restaurant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Restaurant.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Path.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Path.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -90,7 +85,23 @@
       <recent name="uk.ac.ed.inf" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="JUnit.tests">
+    <configuration name="AppTest.testGenerateGeojsons" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ilp" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="uk.ac.ed.inf.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="uk.ac.ed.inf" />
+      <option name="MAIN_CLASS_NAME" value="uk.ac.ed.inf.AppTest" />
+      <option name="METHOD_NAME" value="testGenerateGeojsons" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="tests" type="JUnit" factoryName="JUnit">
       <module name="ilp" />
       <option name="PACKAGE_NAME" value="uk.ac.ed.inf" />
@@ -101,6 +112,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.AppTest.testGenerateGeojsons" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -174,7 +190,14 @@
       <option name="project" value="LOCAL" />
       <updated>1668208105096</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="asdfg">
+      <created>1668301077337</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1668301077337</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -196,10 +219,16 @@
     <MESSAGE value="put checks back in Order.java" />
     <MESSAGE value="bastard" />
     <MESSAGE value="lots of wololo" />
-    <option name="LAST_COMMIT_MESSAGE" value="lots of wololo" />
+    <MESSAGE value="asdfg" />
+    <option name="LAST_COMMIT_MESSAGE" value="asdfg" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
     <select />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/ilp$AppTest_testGenerateGeojsons.ic" NAME="AppTest.testGenerateGeojsons Coverage Results" MODIFIED="1668539863724" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>uk.ac.ed.inf.*</FILTER>
+    </SUITE>
   </component>
 </project>

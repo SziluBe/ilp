@@ -35,21 +35,21 @@ public class Restaurant {
      * @return The available restaurants de-serialised as an array of Restaurant objects
      * @throws IOException In case there is an issue retrieving the data
      */
-    private static Restaurant[] getRestaurantsFromRestServer(URL serverBaseAddress) throws IOException {
-        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "restaurants/"), Restaurant[].class);
-    }
+//    public static Restaurant[] getRestaurantsFromRestServer(URL serverBaseAddress) throws IOException {
+//        return
+//    }
 
-    public static Restaurant[] getRestaurants(URL serverBaseAddress) throws IOException {
-        if (restaurants == null) {
-            restaurants = getRestaurantsFromRestServer(serverBaseAddress);
-            baseAddress = serverBaseAddress;
-        }
-        else if (!serverBaseAddress.equals(baseAddress)) {
-            // TODO: is err the right place to print this?
-            System.err.println("Warning: Restaurants base address has changed from " + baseAddress + " to " + serverBaseAddress + ", but restaurants have already been fetched. This may cause unexpected behaviour.");
-        }
-        return restaurants;
-    }
+//    public static Restaurant[] getRestaurants(URL serverBaseAddress) throws IOException {
+//        if (restaurants == null) {
+//            restaurants = getRestaurantsFromRestServer(serverBaseAddress);
+//            baseAddress = serverBaseAddress;
+//        }
+//        else if (!serverBaseAddress.equals(baseAddress)) {
+//            // TODO: is err the right place to print this?
+//            System.err.println("Warning: Restaurants base address has changed from " + baseAddress + " to " + serverBaseAddress + ", but restaurants have already been fetched. This may cause unexpected behaviour.");
+//        }
+//        return restaurants;
+//    }
 
     /**
      * @return name

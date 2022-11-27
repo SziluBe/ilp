@@ -65,17 +65,17 @@ public class AppTest {
 //        var flightPaths = waypointPaths;
         counter = 0;
         for (ArrayList<LngLat> waypointPath : waypointPaths) {
-            if (counter != 1) { // TODO: A* on steps is too slow >:(
+            if (counter == 5) { // TODO: A* on steps is too slow >:(
                 counter++;
                 continue;
             }
             var flightPath = new ArrayList<LngLat>();
             for (int i = 0; i < waypointPath.size() - 1; i++) {
                 var p = Path.findPath(waypointPath.get(i), waypointPath.get(i + 1), noFlyZones, centralArea, false, true);
-//                flightPath.addAll(p);
+                flightPath.addAll(p);
             }
-//            System.out.println(flightPath.size());
             flightPaths.add(flightPath);
+            System.out.println("Path length: " + flightPaths.get(flightPaths.size() - 1).size());
             counter++;
         }
 
@@ -199,7 +199,7 @@ public class AppTest {
 
     @Test
     public void checkOrderDeSerialisation() throws IOException {
-        assertTrue(Order.getOrdersFromRestServer(Constants.DEFAULT_BASE_ADDRESS).length > 0);
+        assertTrue(Order.getOrdersFromRestServer(Constants.DEFAULT_BASE_ADDRESS, "2023-01-01").length > 0);
     }
 
     @Test

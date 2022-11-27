@@ -116,7 +116,7 @@ public class Order {
     }
 
     public OrderOutcome validateOrder(URL serverBaseAddress) throws IOException {
-        Restaurant[] restaurants = Restaurant.getRestaurants(serverBaseAddress);
+        Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(serverBaseAddress);
 
         if (!this.checkCardNumber()) {
             return OrderOutcome.InvalidCardNumber;
@@ -218,20 +218,20 @@ public class Order {
      * @return The existing orders de-serialised as an array of Order objects
      * @throws IOException In case there is an issue retrieving the data
      */
-    static Order[] getOrdersFromRestServer(URL serverBaseAddress) throws IOException {
-        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "orders/"), Order[].class);
-    }
+//    public static Order[] getOrdersFromRestServer(URL serverBaseAddress, String date) throws IOException {
+//        return
+//    }
 
-    /**
-     * Returns the current array of available orders on a given date from the 'orders/YYYY-MM-DD' endpoint of the given base address
-     *
-     * @param serverBaseAddress The base URL of the REST endpoint
-     * @return The existing orders de-serialised as an array of Order objects
-     * @throws IOException In case there is an issue retrieving the data
-     */
-    static Order[] getOrdersFromRestServerByDate(URL serverBaseAddress, String date) throws IOException {
-        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "orders/" + date), Order[].class);
-    }
+//    /**
+//     * Returns the current array of available orders on a given date from the 'orders/YYYY-MM-DD' endpoint of the given base address
+//     *
+//     * @param serverBaseAddress The base URL of the REST endpoint
+//     * @return The existing orders de-serialised as an array of Order objects
+//     * @throws IOException In case there is an issue retrieving the data
+//     */
+//    static Order[] getOrdersFromRestServerByDate(URL serverBaseAddress, String date) throws IOException {
+//        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "orders/" + date), Order[].class);
+//    }
 
 
     // stuff that'll probably be useful later

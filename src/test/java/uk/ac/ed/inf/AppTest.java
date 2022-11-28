@@ -47,6 +47,16 @@ public class AppTest {
         String deliveriesJson = mapper.writeValueAsString(deliveries);
         System.out.println("Deliveries: " + deliveriesJson);
 
+        LngLat[] flightPath = deliveryPlanner.generateFullFlightpath(deliveredOrders);
+
+        for (int i = 0; i < flightPath.length - 1; i++) {
+            assert (flightPath[i].distanceTo(flightPath[i + 1]) >= Constants.MOVE_LENGTH - 0.000001 &&
+                    flightPath[i].distanceTo(flightPath[i + 1]) <= Constants.MOVE_LENGTH + 0.000001) ||
+                    (flightPath[i].distanceTo(flightPath[i + 1]) >= 0 - 0.000001 &&
+                            flightPath[i].distanceTo(flightPath[i + 1]) <= 0 + 0.000001): "Flightpath not correct length " +
+                    flightPath[i].distanceTo(flightPath[i + 1]);
+        }
+
         // serialise flightpath geojson
         FeatureCollection flightPathGeoJson = deliveryPlanner.generateFlightPathGeoJson();
         String flightPathGeoJsonStr = flightPathGeoJson.toJson();

@@ -73,21 +73,13 @@ public class DeliveryPlanner {
             LngLat[] orderFlightPath = flightpathCalculator.calculateFlightPath(order);
             flightPath.addAll(Arrays.asList(orderFlightPath)); // to restaurant
 
-            flightPath.add(order.getRestaurant().getLnglat()); // hover
+            flightPath.add(orderFlightPath[orderFlightPath.length - 1]); // hover
 
             ArrayList<LngLat> reversePath = new ArrayList<>(Arrays.asList(orderFlightPath));
             Collections.reverse(reversePath);
             flightPath.addAll(reversePath); // from restaurant
 
-            flightPath.add(appData.getDeliveryOrigin()); // hover
-        }
-        // TODO: solve step length issue
-        for (int i = 0; i < flightPath.size() - 1; i++) {
-            assert (flightPath.get(i).distanceTo(flightPath.get(i + 1)) >= Constants.MOVE_LENGTH - 0.0002 &&
-                    flightPath.get(i).distanceTo(flightPath.get(i + 1)) <= Constants.MOVE_LENGTH + 0.0002) ||
-                    (flightPath.get(i).distanceTo(flightPath.get(i + 1)) >= 0 - 0.0002 &&
-                    flightPath.get(i).distanceTo(flightPath.get(i + 1)) <= 0 + 0.0002): "Flightpath not correct length " +
-                    flightPath.get(i).distanceTo(flightPath.get(i + 1));
+            flightPath.add(orderFlightPath[0]); // hover
         }
         return flightPath.toArray(new LngLat[0]);
     }

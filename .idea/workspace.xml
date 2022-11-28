@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="fb7dc8e7-b36c-4d5a-ae87-fd1f150579b7" name="Changes" comment="stuff">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/ApplicationData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/ApplicationData.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/DeliveryPlanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/DeliveryPlanner.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/FlightpathCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/FlightpathCalculator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Order.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

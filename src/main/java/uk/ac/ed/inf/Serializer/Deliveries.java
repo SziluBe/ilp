@@ -1,4 +1,4 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Serializer;
 
 public class Deliveries {
     private final DeliveryEntry[] deliveryEntries;

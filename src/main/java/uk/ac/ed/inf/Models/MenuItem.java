@@ -1,9 +1,9 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Menu {
+public class MenuItem {
     private final String name;
     private final int priceInPence;
 
@@ -14,7 +14,7 @@ public class Menu {
      * @param priceInPence The price of the menu item (pizza) in pence
      */
     @JsonCreator
-    private Menu(@JsonProperty("name") String name, @JsonProperty("priceInPence") int priceInPence) {
+    private MenuItem(@JsonProperty("name") String name, @JsonProperty("priceInPence") int priceInPence) {
         this.name = name;
         this.priceInPence = priceInPence;
     }

@@ -1,24 +1,30 @@
 package uk.ac.ed.inf;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.ac.ed.inf.Models.*;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 
 public class ApplicationData {
-    private Restaurant[] restaurants;
-    private URL baseAddress;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private final Restaurant[] restaurants;
     private Order[] orders;
-    private Area[] noFlyZones;
-    private Area centralArea;
-    private LngLat deliveryTarget;
+    private final Area[] noFlyZones;
+    private final Area centralArea;
+    private final LngLat deliveryOrigin;
 
-    public ApplicationData(URL baseAddress, String date) throws IOException {
-        this.baseAddress = baseAddress;
-        this.restaurants = Constants.MAPPER.readValue(new URL(baseAddress + "restaurants/"), Restaurant[].class);
-        this.orders = Constants.MAPPER.readValue(new URL(baseAddress + "orders/" + date), Order[].class);
-        this.noFlyZones = Arrays.stream((Constants.MAPPER.readValue(new URL(baseAddress + "noFlyZones"), NamedArea[].class))).map(NamedArea::getArea).toArray(Area[]::new);
-        this.centralArea = Constants.MAPPER.readValue(new URL(baseAddress + "centralArea"), NamedArea.class).getArea();
-        this.deliveryTarget = Constants.AT;
+    // TODO: talk about how we use this instead of singletons in the report
+    public ApplicationData(URL baseAddress, String date, LngLat deliveryOrigin) throws IOException {
+        this.restaurants = MAPPER.readValue(new URL(baseAddress + "restaurants/"), Restaurant[].class);
+        this.orders = MAPPER.readValue(new URL(baseAddress + "orders/" + date), Order[].class);
+        this.noFlyZones = Arrays.stream((MAPPER.readValue(new URL(baseAddress + "noFlyZones"), NamedArea[].class))).map(NamedArea::getArea).toArray(Area[]::new);
+        this.centralArea = MAPPER.readValue(new URL(baseAddress + "centralArea"), NamedArea.class).getArea();
+        this.deliveryOrigin = deliveryOrigin;
+//        // validate orders
+//        Arrays.stream(this.orders).forEach(order -> order.setOutcome(order.validateOrder(restaurants)));
+//        this.orders = Arrays.stream(this.orders).filter(order -> order.getOutcome() == OrderOutcome.ValidButNotDelivered).toArray(Order[]::new);
     }
 
     public Restaurant[] getRestaurants() {
@@ -29,6 +35,10 @@ public class ApplicationData {
         return orders;
     }
 
+    public void setOrders(Order[] orders) {
+        this.orders = orders;
+    }
+
     public Area[] getNoFlyZones() {
         return noFlyZones;
     }
@@ -37,11 +47,7 @@ public class ApplicationData {
         return centralArea;
     }
 
-    public LngLat getDeliveryTarget() {
-        return deliveryTarget;
-    }
-
-    public URL getBaseAddress() {
-        return baseAddress;
+    public LngLat getDeliveryOrigin() {
+        return deliveryOrigin;
     }
 }

@@ -1,4 +1,4 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
 
 public enum OrderOutcome {
     Delivered,
@@ -10,5 +10,5 @@ public enum OrderOutcome {
     InvalidPizzaNotDefined,
     InvalidPizzaCount,
     InvalidPizzaCombinationMultipleSuppliers,
-    Invalid // TODO: for when the order can't be parsed?
+    Undecided // TODO: justify in report
 }

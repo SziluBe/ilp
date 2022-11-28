@@ -1,11 +1,12 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.ac.ed.inf.*;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Order {
     private final String orderNo;
@@ -15,8 +16,10 @@ public class Order {
     private final String creditCardExpiry;
     private final String cvv;
     private final int priceTotalInPence;
-    private final String[] orderItems;
-    private boolean delivered;
+    private final Set<String> orderItems;
+    private OrderOutcome outcome;
+    private Restaurant restaurant;
+    private int requiredSteps;
 
     /**
      * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
@@ -41,23 +44,12 @@ public class Order {
         this.creditCardExpiry = creditCardExpiry;
         this.cvv = cvv;
         this.priceTotalInPence = priceTotalInPence;
-        this.orderItems = orderItems;
-        this.delivered = false;
+        this.orderItems = Set.of(orderItems);
+        this.outcome = OrderOutcome.Undecided;
+        this.restaurant = null;
+        this.requiredSteps = -1;
     }
 
-    /**
-     * @return Whether the order has been delivered
-     */
-    public boolean isDelivered() {
-        return delivered;
-    }
-
-    /**
-     * @param delivered Whether the order has been delivered
-     */
-    public void setDelivered(boolean delivered) {
-        this.delivered = delivered;
-    }
 
     /**
      * @return orderNo
@@ -111,13 +103,34 @@ public class Order {
     /**
      * @return orderItems
      */
-    public String[] getOrderItems() {
+    public Set<String> getOrderItems() {
         return orderItems;
     }
 
-    public OrderOutcome validateOrder(URL serverBaseAddress) throws IOException {
-        Restaurant[] restaurants = Restaurant.getRestaurantsFromRestServer(serverBaseAddress);
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
 
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    public int getRequiredSteps() {
+        return requiredSteps;
+    }
+
+    public void setRequiredSteps(int requiredSteps) {
+        this.requiredSteps = requiredSteps;
+    }
+
+    public OrderOutcome getOutcome() {
+        return outcome;
+    }
+    public void setOutcome(OrderOutcome outcome) {
+        this.outcome = outcome;
+    }
+
+    public OrderOutcome validateOrder(Restaurant[] restaurants) {
         if (!this.checkCardNumber()) {
             return OrderOutcome.InvalidCardNumber;
         }
@@ -139,10 +152,6 @@ public class Order {
         if (!this.checkPizzaCombination(restaurants)) {
             return OrderOutcome.InvalidPizzaCombinationMultipleSuppliers;
         }
-
-        if (this.delivered) {
-            return OrderOutcome.Delivered;
-        }
         return OrderOutcome.ValidButNotDelivered;
     }
 
@@ -151,25 +160,18 @@ public class Order {
      *
      * @param restaurants The restaurants considered
      * @return The sum of the prices of the pizzas, plus 1 pound delivery charge, in pence
-     * @throws InvalidPizzaCombination Thrown if invalid combination of pizzas/restaurants provided.
      */
-    public int getDeliveryCost(Restaurant[] restaurants) throws InvalidPizzaCombination {
+    public int getDeliveryCost(Restaurant[] restaurants) {
         try { // Make sure we don't crash if we somehow get a null value in restaurants
             assert restaurants != null;
         } catch (AssertionError e) {
             return -1;
         }
 
-        if (!checkPizzaCombination(restaurants)) {
-            throw new InvalidPizzaCombination();
-        } // no need for `else` since we are throwing an exception in the body of the if statement
-
         return calcTotal(restaurants) + Constants.DELIVERY_CHARGE;
     }
 
     private boolean checkPizzaCombination(Restaurant[] restaurants) {
-        Set<String> orderItemsSet = new HashSet<>(Arrays.asList(this.orderItems));
-
         try { // Make sure we don't crash if we somehow get a null value in restaurants
             assert restaurants != null;
         } catch (AssertionError e) {
@@ -178,60 +180,37 @@ public class Order {
 
         return Arrays.stream(restaurants).anyMatch(restaurant -> {
             Set<String> menuItemNames = new HashSet<>(Arrays.stream(restaurant.getMenu())
-                    .map(Menu::getName)
+                    .map(MenuItem::getName)
                     .toList()); // create set of pizza names available at each restaurant
 
-            menuItemNames.retainAll(orderItemsSet); // find intersection between order and pizzas available (names)
+            menuItemNames.retainAll(this.orderItems); // find intersection between order and pizzas available (names)
 
-            return menuItemNames.size() == orderItemsSet.size(); // if the order is valid, all pizzas must come from the same restaurant
+            return menuItemNames.size() == this.orderItems.size(); // if the order is valid, all pizzas must come from the same restaurant
         });
 
     }
 
     private int calcTotal(Restaurant[] restaurants) {
-        List<Menu> allMenuItems = getAllMenuItems(restaurants);
-
-        Set<String> pizzaNamesSet = new HashSet<>(Arrays.asList(this.orderItems)); // for faster lookup
+        List<MenuItem> allMenuItems = getAllMenuItems(restaurants);
 
         return allMenuItems.stream()
                 .filter(menuItem -> { // filter for pizzas whose name appears in the list of names
-                    return pizzaNamesSet.contains(menuItem.getName());
+                    return this.orderItems.contains(menuItem.getName());
                 })
-                .map(Menu::getPriceInPence) // get their prices
+                .map(MenuItem::getPriceInPence) // get their prices
                 .reduce(0, Integer::sum);
     }
 
-    private List<Menu> getAllMenuItems(Restaurant[] restaurants) {
+    private List<MenuItem> getAllMenuItems(Restaurant[] restaurants) {
         return Arrays.stream(restaurants)
                 .map(Restaurant::getMenu) // map to Arrays
                 .map(Arrays::asList) // then to Lists
-                .reduce(new ArrayList<Menu>(), (runningList, newMenuArray) -> { // concatenate
+                // TODO: decide if we want explicit type here
+                .reduce(new ArrayList<MenuItem>(), (runningList, newMenuArray) -> { // concatenate
                     runningList.addAll(newMenuArray);
                     return runningList;
                 });
     }
-
-    /**
-     * Returns the current array of available orders from the 'orders/' endpoint of the given base address
-     *
-     * @param serverBaseAddress The base URL of the REST endpoint
-     * @return The existing orders de-serialised as an array of Order objects
-     * @throws IOException In case there is an issue retrieving the data
-     */
-//    public static Order[] getOrdersFromRestServer(URL serverBaseAddress, String date) throws IOException {
-//        return
-//    }
-
-//    /**
-//     * Returns the current array of available orders on a given date from the 'orders/YYYY-MM-DD' endpoint of the given base address
-//     *
-//     * @param serverBaseAddress The base URL of the REST endpoint
-//     * @return The existing orders de-serialised as an array of Order objects
-//     * @throws IOException In case there is an issue retrieving the data
-//     */
-//    static Order[] getOrdersFromRestServerByDate(URL serverBaseAddress, String date) throws IOException {
-//        return Constants.MAPPER.readValue(new URL(serverBaseAddress + "orders/" + date), Order[].class);
-//    }
 
 
     // stuff that'll probably be useful later
@@ -254,7 +233,7 @@ public class Order {
         return (sum % 10 == 0) && (this.creditCardNumber.length() == 16 || this.creditCardNumber.length() == 13 || this.creditCardNumber.length() == 15);
     }
 
-    private boolean checkExpiryDate() {
+    private boolean checkExpiryDate() { // TODO: this should validate with the day of the order
         boolean checkLength = this.creditCardExpiry.length() == 5;
         if (checkLength) {
             return this.creditCardExpiry.matches("(10|11|12|0[1-9])\\/(2[3-9]|[3-9][0-9])");  // Technically this will become wrong if we change centuries, but for the time being it is safer.
@@ -268,28 +247,26 @@ public class Order {
     }
 
     private boolean checkPizzaCount() {
-        int l = this.orderItems.length;
+        int l = this.orderItems.size();
         return 0 < l && l < 5;
     }
 
-    private boolean checkPizzasDefined(Restaurant[] restaurants) throws IOException {
+    private boolean checkPizzasDefined(Restaurant[] restaurants) {
         try { // Make sure we don't crash if we somehow get a null value in restaurants
             assert restaurants != null;
         } catch (AssertionError e) {
             return false;
         }
 
-        List<Menu> allMenuItems = getAllMenuItems(restaurants);
+        List<MenuItem> allMenuItems = getAllMenuItems(restaurants);
 
-        HashSet<String> allMenuNames = new HashSet<>(allMenuItems.stream() // we want a HashSet for fast lookup
-                .map(Menu::getName) // map List<Menu>
-                .toList()); // to List<String>
+        HashSet<String> allMenuNames = allMenuItems.stream() // we want a HashSet for fast lookup
+                .map(MenuItem::getName).collect(Collectors.toCollection(HashSet::new)); // to Set<String>
 
-        return Arrays.stream(this.orderItems)
-                .allMatch(allMenuNames::contains); // ensure every pizza name in the order is present in at least one restaurant's menu
+        return allMenuNames.containsAll(this.orderItems); // ensure every pizza name in the order is present in at least one restaurant's menu
     }
 
-    private boolean checkTotal(Restaurant[] restaurants) throws IOException {
+    private boolean checkTotal(Restaurant[] restaurants) {
         // difficult to remove code duplication and also retain readability due to the try-catch, I think the code is least confusing kept this way
         try { // Make sure we don't crash if we somehow get a null value in restaurants
             assert restaurants != null;

@@ -1,4 +1,7 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
+
+import uk.ac.ed.inf.Models.Area;
+import uk.ac.ed.inf.Models.LngLat;
 
 import java.util.*; // TODO: maybe limit imports
 
@@ -66,7 +69,7 @@ public class Path { // TODO: refactor
 
     // Set wayPointMode to true to find waypoints
     // Set it to false and pass the current location as start, and the next location as goal
-    static ArrayList<LngLat> findPath(LngLat start, LngLat goal, Area[] noFlyZones, Area centralArea, boolean wayPointMode, boolean weighted) {
+    public static ArrayList<LngLat> findPath(LngLat start, LngLat goal, Area[] noFlyZones, Area centralArea, boolean wayPointMode, boolean weighted) {
         // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from start
         // to n currently known.
         var cameFrom = new HashMap<LngLat, LngLat>();

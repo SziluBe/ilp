@@ -1,4 +1,6 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
+
+import uk.ac.ed.inf.Constants;
 
 import java.util.ArrayList;
 
@@ -48,10 +50,10 @@ public record LngLat(double lng, double lat) {
     public ArrayList<LngLat> adjacentLngLats() {
         // add a lnglat for each cmpdir
         ArrayList<LngLat> adjacentLngLats = new ArrayList<>();
-        for (CmpDir cmpDir : CmpDir.values()) {
+        for (Direction direction : Direction.values()) {
             // if not hover
-            if (!cmpDir.equals(CmpDir.HOVER)) {
-                adjacentLngLats.add(this.add(cmpDir.toLngLat()));
+            if (!direction.equals(Direction.HOVER)) {
+                adjacentLngLats.add(this.add(direction.toLngLat()));
             }
         }
         return adjacentLngLats;
@@ -87,7 +89,7 @@ public record LngLat(double lng, double lat) {
      * @param dir The CmpDir object representing the compass direction in which the hypothetical move is happening.
      * @return Returns the LngLat object representing the point the drone would end up at after taking this move.
      */
-    public LngLat nextPosition(CmpDir dir) {
+    public LngLat nextPosition(Direction dir) {
         return add(dir.toLngLat());
     }
 

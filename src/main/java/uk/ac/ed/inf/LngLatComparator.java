@@ -1,5 +1,7 @@
 package uk.ac.ed.inf;
 
+import uk.ac.ed.inf.Models.LngLat;
+
 public class LngLatComparator {
     private LngLat start;
     private LngLat end;

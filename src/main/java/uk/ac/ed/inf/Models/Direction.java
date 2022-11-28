@@ -1,6 +1,9 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
 
-public enum CmpDir {
+import uk.ac.ed.inf.Constants;
+import uk.ac.ed.inf.Models.LngLat;
+
+public enum Direction {
     E(0 * 22.5),
     ENE(1 * 22.5),
     NE(2 * 22.5),
@@ -21,7 +24,7 @@ public enum CmpDir {
 
     private final Double angle;
 
-    CmpDir(Double angle) {
+    Direction(Double angle) {
         this.angle = angle;
     }
 

@@ -1,4 +1,4 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
 
 public class NamedLocation {
     private final String name;
@@ -8,7 +8,8 @@ public class NamedLocation {
      * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
      *
      * @param name The name of the location
-     * @param location The location
+     * @param longitude The longitude coordinate of the location
+     * @param latitude The latitude coordinate of the location
      */
     @com.fasterxml.jackson.annotation.JsonCreator
     // name, longitude, latitude

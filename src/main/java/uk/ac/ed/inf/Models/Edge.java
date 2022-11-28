@@ -1,4 +1,4 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Models;
 
 
 import java.awt.geom.Line2D;

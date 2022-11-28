@@ -36,7 +36,7 @@ public class DeliveryPlanner {
 
         // calculate flightpath length per order and sort orders in increasing order by required steps
         for (Order order : appData.getOrders()) {
-            int steps = flightpathCalculator.calculateFlightPath(order).length + 2; // +2 for collection and delivery
+            int steps = 2 * flightpathCalculator.calculateFlightPath(order).length + 2; // +2 for collection and delivery
             order.setRequiredSteps(steps);
         }
         Arrays.sort(appData.getOrders(), Comparator.comparingInt(Order::getRequiredSteps));
@@ -44,16 +44,29 @@ public class DeliveryPlanner {
         // get orders up to sum of steps Constants.MAX_MOVES
         int sum = 0;
         int i = 0;
-        while (sum <= Constants.MAX_MOVES && i < appData.getOrders().length) {
-            if (appData.getOrders()[i].getOutcome() == OrderOutcome.ValidButNotDelivered) {
-                sum += appData.getOrders()[i].getRequiredSteps();
+        while (i < appData.getOrders().length) {
+            int newsum = sum + appData.getOrders()[i].getRequiredSteps();
+            if (appData.getOrders()[i].getOutcome() == OrderOutcome.ValidButNotDelivered && newsum <= Constants.MAX_MOVES) {
                 appData.getOrders()[i].setOutcome(OrderOutcome.Delivered);
+                sum = newsum;
             }
             i++;
+            if (sum >= Constants.MAX_MOVES) {
+                break;
+            }
         }
+        System.out.println("sum of steps: " + sum);
     }
 
-    private LngLat[] generateFullFlightpath(Order[] orders) {
+    public Order[] getDeliveredOrders() {
+        return Arrays.stream(appData.getOrders()).filter(order -> order.getOutcome() == OrderOutcome.Delivered).toArray(Order[]::new);
+    }
+
+    public Order[] getValidUndeliveredOrders() {
+        return Arrays.stream(appData.getOrders()).filter(order -> order.getOutcome() == OrderOutcome.ValidButNotDelivered).toArray(Order[]::new);
+    }
+
+    public LngLat[] generateFullFlightpath(Order[] orders) {
         ArrayList<LngLat> flightPath = new ArrayList<>();
         for (Order order : orders) {
             // memoised flightpath so calling calculateFlightPath doesn't recalculate
@@ -67,6 +80,14 @@ public class DeliveryPlanner {
             flightPath.addAll(reversePath); // from restaurant
 
             flightPath.add(appData.getDeliveryOrigin()); // hover
+        }
+        // TODO: solve step length issue
+        for (int i = 0; i < flightPath.size() - 1; i++) {
+            assert (flightPath.get(i).distanceTo(flightPath.get(i + 1)) >= Constants.MOVE_LENGTH - 0.0002 &&
+                    flightPath.get(i).distanceTo(flightPath.get(i + 1)) <= Constants.MOVE_LENGTH + 0.0002) ||
+                    (flightPath.get(i).distanceTo(flightPath.get(i + 1)) >= 0 - 0.0002 &&
+                    flightPath.get(i).distanceTo(flightPath.get(i + 1)) <= 0 + 0.0002): "Flightpath not correct length " +
+                    flightPath.get(i).distanceTo(flightPath.get(i + 1));
         }
         return flightPath.toArray(new LngLat[0]);
     }
@@ -88,7 +109,7 @@ public class DeliveryPlanner {
     }
 
     public FeatureCollection generateFlightPathGeoJson() {
-        LngLat[] flightPath = generateFullFlightpath(appData.getOrders());
+        LngLat[] flightPath = generateFullFlightpath(getDeliveredOrders());
         List<Point> flightPathPoints = new ArrayList<>();
         for (LngLat waypoint : flightPath) {
             flightPathPoints.add(Point.fromLngLat(waypoint.lng(), waypoint.lat()));

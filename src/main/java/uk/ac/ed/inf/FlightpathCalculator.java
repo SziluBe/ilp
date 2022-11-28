@@ -26,17 +26,18 @@ public class FlightpathCalculator {
         if (restaurantsPathsMap.get(restaurant) == null) {
             LngLat target = restaurant.getLnglat();
             // TODO: migrate code from findPath to here
-            ArrayList<LngLat> waypointPath = Path.findPath(deliveryOrigin, target, noFlyZones, centralArea, true, false);
-            ArrayList<LngLat> flightPath = new ArrayList<>();
-            // TODO: handle null waypointPath
-            assert waypointPath != null;
-
-            LngLat previous = deliveryOrigin;
-
-            for (LngLat waypoint : waypointPath) {
-                flightPath.addAll(Path.findPath(previous, waypoint, noFlyZones, centralArea, false, true));
-                previous = waypoint;
-            }
+            ArrayList<LngLat> flightPath = Path.findPath(deliveryOrigin, target, noFlyZones, centralArea, false, true);
+            // TODO/WARNING: wayPointMode actually gets 1 less delivery done on 2023-01-01, so don't use it!
+//            ArrayList<LngLat> flightPath = new ArrayList<>();
+//            // TODO: handle null waypointPath
+//            assert waypointPath != null;
+//
+//            LngLat previous = deliveryOrigin;
+//
+//            for (LngLat waypoint : waypointPath) {
+//                flightPath.addAll(Path.findPath(previous, waypoint, noFlyZones, centralArea, false, true));
+//                previous = waypoint;
+//            }
 
             restaurantsPathsMap.put(restaurant, flightPath.toArray(new LngLat[0]));
         }

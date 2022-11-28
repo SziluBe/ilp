@@ -20,7 +20,7 @@ public class ApplicationData {
         this.restaurants = MAPPER.readValue(new URL(baseAddress + "restaurants/"), Restaurant[].class);
         this.orders = MAPPER.readValue(new URL(baseAddress + "orders/" + date), Order[].class);
         this.noFlyZones = Arrays.stream((MAPPER.readValue(new URL(baseAddress + "noFlyZones"), NamedArea[].class))).map(NamedArea::getArea).toArray(Area[]::new);
-        this.centralArea = MAPPER.readValue(new URL(baseAddress + "centralArea"), NamedArea.class).getArea();
+        this.centralArea = new Area(Arrays.stream(MAPPER.readValue(new URL(baseAddress + "centralArea"), NamedLocation[].class)).map(NamedLocation::getLocation).toArray(LngLat[]::new));
         this.deliveryOrigin = deliveryOrigin;
 //        // validate orders
 //        Arrays.stream(this.orders).forEach(order -> order.setOutcome(order.validateOrder(restaurants)));

@@ -16,7 +16,7 @@ public class Order {
     private final String creditCardExpiry;
     private final String cvv;
     private final int priceTotalInPence;
-    private final Set<String> orderItems;
+    private final List<String> orderItems;
     private OrderOutcome outcome;
     private Restaurant restaurant;
     private int requiredSteps;
@@ -44,7 +44,7 @@ public class Order {
         this.creditCardExpiry = creditCardExpiry;
         this.cvv = cvv;
         this.priceTotalInPence = priceTotalInPence;
-        this.orderItems = Set.of(orderItems);
+        this.orderItems = List.of(orderItems);
         this.outcome = OrderOutcome.Undecided;
         this.restaurant = null;
         this.requiredSteps = -1;
@@ -103,7 +103,7 @@ public class Order {
     /**
      * @return orderItems
      */
-    public Set<String> getOrderItems() {
+    public List<String> getOrderItems() {
         return orderItems;
     }
 

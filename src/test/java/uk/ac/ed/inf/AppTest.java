@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.mapbox.geojson.*;
 import uk.ac.ed.inf.Models.*;
+import uk.ac.ed.inf.Serializer.Deliveries;
+import uk.ac.ed.inf.Serializer.DeliveryEntry;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +25,36 @@ public class AppTest {
     @Test
     public void shouldAnswerWithTrue() {
         assertTrue(true);
+    }
+
+    @Test
+    public void testDeliveryPlanner() throws IOException {
+        URL baseAddress = Constants.DEFAULT_BASE_ADDRESS;
+        String date = "2023-01-01";
+        LngLat deliveryOrigin = Constants.AT;
+
+        ApplicationData applicationData = new ApplicationData(baseAddress, date, deliveryOrigin);
+        FlightpathCalculator flightpathCalculator = new FlightpathCalculator(applicationData.getRestaurants(), applicationData.getNoFlyZones(), applicationData.getCentralArea(), applicationData.getDeliveryOrigin());
+
+        DeliveryPlanner deliveryPlanner = new DeliveryPlanner(applicationData, flightpathCalculator);
+        deliveryPlanner.setOrderOutcomes();
+
+        Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
+        Deliveries deliveries = deliveryPlanner.generateDeliveriesOutPut(deliveredOrders);
+
+        // serialise deliveries
+        ObjectMapper mapper = new ObjectMapper();
+        String deliveriesJson = mapper.writeValueAsString(deliveries);
+        System.out.println("Deliveries: " + deliveriesJson);
+
+        // serialise flightpath geojson
+        FeatureCollection flightPathGeoJson = deliveryPlanner.generateFlightPathGeoJson();
+        String flightPathGeoJsonStr = flightPathGeoJson.toJson();
+        System.out.println("Flightpath GeoJson: " + flightPathGeoJsonStr);
+
+        System.out.println("Total distance: " + deliveryPlanner.generateFullFlightpath(deliveryPlanner.getDeliveredOrders()).length);
+        System.out.println("Delivered Orders: " + deliveredOrders.length);
+        System.out.println("Valid but undelivered Orders: " + deliveryPlanner.getValidUndeliveredOrders().length);
     }
 
 //    @Test

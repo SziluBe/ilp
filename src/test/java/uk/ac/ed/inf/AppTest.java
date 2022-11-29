@@ -36,10 +36,10 @@ public class AppTest {
         dates.add(startDate);
         // generate all date strings from 2023-01-01 to 2023-05-31
         int i = 1;
-//        while (dates.get(dates.size() - 1).isBefore(LocalDate.of(2023, 6, 1))) {
-//            dates.add(startDate.plusDays(i));
-//            i++;
-//        }
+        while (dates.get(dates.size() - 1).isBefore(LocalDate.of(2023, 6, 1))) {
+            dates.add(startDate.plusDays(i));
+            i++;
+        }
 
         for (LocalDate date : dates) {
             String dateString = date.toString();

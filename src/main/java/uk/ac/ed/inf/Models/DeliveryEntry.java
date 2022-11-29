@@ -1,6 +1,4 @@
-package uk.ac.ed.inf.Serializer;
-
-import uk.ac.ed.inf.Models.OrderOutcome;
+package uk.ac.ed.inf.Models;
 
 public record DeliveryEntry(String orderNo, OrderOutcome outcome, int costInPence) {
 }

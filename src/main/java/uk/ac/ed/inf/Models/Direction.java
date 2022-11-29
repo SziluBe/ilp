@@ -1,7 +1,6 @@
 package uk.ac.ed.inf.Models;
 
 import uk.ac.ed.inf.Constants;
-import uk.ac.ed.inf.Models.LngLat;
 
 public enum Direction {
     E(0 * 22.5),

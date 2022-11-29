@@ -1,7 +1,5 @@
 package uk.ac.ed.inf.Models;
 
-import uk.ac.ed.inf.Models.Area;
-import uk.ac.ed.inf.Models.LngLat;
 
 import java.util.*; // TODO: maybe limit imports
 

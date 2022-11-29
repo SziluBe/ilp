@@ -1,10 +1,19 @@
 package uk.ac.ed.inf.Models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import uk.ac.ed.inf.Constants;
 
 import java.util.ArrayList;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record LngLat(double lng, double lat) {
+    @JsonCreator
+    public LngLat(@com.fasterxml.jackson.annotation.JsonProperty("longitude") double lng, @com.fasterxml.jackson.annotation.JsonProperty("latitude") double lat) {
+        this.lng = lng;
+        this.lat = lat;
+    }
+
     /**
      * Checks whether the point represented by the LngLat instance is within the given Area or not.
      *
@@ -48,12 +57,12 @@ public record LngLat(double lng, double lat) {
     // in fact, adjacentLngLats should take a slope parameter, and return the list of vertices
     // sorted by the angle between the line between current and goal, and the line between current and the vertex
     public ArrayList<LngLat> adjacentLngLats() {
-        // add a lnglat for each cmpdir
+        // add the LngLat for each Direction
         ArrayList<LngLat> adjacentLngLats = new ArrayList<>();
         for (Direction direction : Direction.values()) {
             // if not hover
             if (!direction.equals(Direction.HOVER)) {
-                adjacentLngLats.add(this.add(direction.toLngLat()));
+                adjacentLngLats.add(this.nextPosition(direction));
             }
         }
         return adjacentLngLats;

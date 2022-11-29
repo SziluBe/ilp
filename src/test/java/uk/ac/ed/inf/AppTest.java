@@ -4,14 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import com.mapbox.geojson.*;
+
 import uk.ac.ed.inf.Models.*;
-import uk.ac.ed.inf.Serializer.Deliveries;
-import uk.ac.ed.inf.Serializer.DeliveryEntry;
 
 import static org.junit.Assert.*;
 
@@ -30,41 +26,40 @@ public class AppTest {
     @Test
     public void testDeliveryPlanner() throws IOException {
         URL baseAddress = Constants.DEFAULT_BASE_ADDRESS;
-        String date = "2023-01-01";
+        String date = "2023-01-03";
         LngLat deliveryOrigin = Constants.AT;
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        ApplicationData applicationData = new ApplicationData(baseAddress, date, deliveryOrigin);
-        FlightpathCalculator flightpathCalculator = new FlightpathCalculator(applicationData.getRestaurants(), applicationData.getNoFlyZones(), applicationData.getCentralArea(), applicationData.getDeliveryOrigin());
+        ApplicationData applicationData = new ApplicationData(baseAddress, date, deliveryOrigin, objectMapper);
+        FlightpathCalculator flightpathCalculator = new FlightpathCalculator(applicationData);
 
         DeliveryPlanner deliveryPlanner = new DeliveryPlanner(applicationData, flightpathCalculator);
         deliveryPlanner.setOrderOutcomes();
 
         Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-        Deliveries deliveries = deliveryPlanner.generateDeliveriesOutPut(deliveredOrders);
+        OutPutGenerator outPutGenerator = new OutPutGenerator(deliveryPlanner, flightpathCalculator, objectMapper);
+        String deliveries = outPutGenerator.generateDeliveriesOutPut(deliveredOrders);
 
-        // serialise deliveries
-        ObjectMapper mapper = new ObjectMapper();
-        String deliveriesJson = mapper.writeValueAsString(deliveries);
-        System.out.println("Deliveries: " + deliveriesJson);
+        ArrayList<LngLat> flightpath = flightpathCalculator.calculateFlightpath(deliveredOrders);
 
-        LngLat[] flightPath = deliveryPlanner.generateFullFlightpath(deliveredOrders);
-
-        for (int i = 0; i < flightPath.length - 1; i++) {
-            assert (flightPath[i].distanceTo(flightPath[i + 1]) >= Constants.MOVE_LENGTH - 0.000001 &&
-                    flightPath[i].distanceTo(flightPath[i + 1]) <= Constants.MOVE_LENGTH + 0.000001) ||
-                    (flightPath[i].distanceTo(flightPath[i + 1]) >= 0 - 0.000001 &&
-                            flightPath[i].distanceTo(flightPath[i + 1]) <= 0 + 0.000001): "Flightpath not correct length " +
-                    flightPath[i].distanceTo(flightPath[i + 1]);
+        for (int i = 0; i < flightpath.size() - 1; i++) {
+            assert (flightpath.get(i).distanceTo(flightpath.get(i + 1)) >= Constants.MOVE_LENGTH - 0.000001 &&
+                    flightpath.get(i).distanceTo(flightpath.get(i + 1)) <= Constants.MOVE_LENGTH + 0.000001) ||
+                   (flightpath.get(i).distanceTo(flightpath.get(i + 1)) >= 0 - 0.000001 &&
+                    flightpath.get(i).distanceTo(flightpath.get(i + 1)) <= 0 + 0.000001): "Move not correct length " +
+                    flightpath.get(i).distanceTo(flightpath.get(i + 1));
         }
 
-        // serialise flightpath geojson
-        FeatureCollection flightPathGeoJson = deliveryPlanner.generateFlightPathGeoJson();
-        String flightPathGeoJsonStr = flightPathGeoJson.toJson();
-        System.out.println("Flightpath GeoJson: " + flightPathGeoJsonStr);
+        String flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
 
-        System.out.println("Total distance: " + deliveryPlanner.generateFullFlightpath(deliveryPlanner.getDeliveredOrders()).length);
+        System.out.println("Deliveries: " + deliveries);
+        System.out.println("Flightpath GeoJson: " + flightPathGeoJson);
+        System.out.println("Total distance: " + flightpath.size());
         System.out.println("Delivered Orders: " + deliveredOrders.length);
+        assertEquals(29, deliveredOrders.length);
         System.out.println("Valid but undelivered Orders: " + deliveryPlanner.getValidUndeliveredOrders().length);
+        System.out.println("Invalid Orders: " + deliveryPlanner.getInvalidOrders().length);
+        assertEquals(7, deliveryPlanner.getInvalidOrders().length);
     }
 
 //    @Test
@@ -94,7 +89,7 @@ public class AppTest {
 //            var waypointPath = waypointPaths.get(i);
 //            List<Point> waypointPathPoints = new ArrayList<>();
 //            for (LngLat waypoint : waypointPath) {
-//                waypointPathPoints.add(Point.fromLngLat(waypoint.lng(), waypoint.lat()));
+//                waypointPathPoints.add(Point.fromLngLat(waypoint.getLng(), waypoint.getLat()));
 //            }
 //            FeatureCollection waypointPathGeojson = FeatureCollection.fromFeatures(new Feature[] {Feature.fromGeometry(LineString.fromLngLats(waypointPathPoints))});
 //            // print
@@ -127,7 +122,7 @@ public class AppTest {
 //        for (ArrayList<LngLat> flightPath : flightPaths) {
 //            List<Point> flightPathPoints = new ArrayList<>();
 //            for (LngLat waypoint : flightPath) {
-//                flightPathPoints.add(Point.fromLngLat(waypoint.lng(), waypoint.lat()));
+//                flightPathPoints.add(Point.fromLngLat(waypoint.getLng(), waypoint.getLat()));
 //            }
 //            FeatureCollection flightPathGeojson = FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(LineString.fromLngLats(flightPathPoints))});
 //            // print
@@ -168,7 +163,7 @@ public class AppTest {
 //        }
 //        List<Point> points2 = new ArrayList<>();
 //        for (LngLat point : allpoints) {
-//            points2.add(Point.fromLngLat(point.lng(), point.lat()));
+//            points2.add(Point.fromLngLat(point.getLng(), point.getLat()));
 //        }
 //        FeatureCollection fc2 = FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(LineString.fromLngLats(points2))});
 //        System.out.println("all points");
@@ -178,7 +173,7 @@ public class AppTest {
 //        // convert points to geojson and save to file
 //        List<Point> points3 = new ArrayList<>();
 //        for (LngLat point : visiblePoints) {
-//            points3.add(Point.fromLngLat(point.lng(), point.lat()));
+//            points3.add(Point.fromLngLat(point.getLng(), point.getLat()));
 //        }
 //        FeatureCollection fc3 = FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(LineString.fromLngLats(points3))});
 //        System.out.println("visible points");
@@ -195,7 +190,7 @@ public class AppTest {
 //        List<Point> points = new ArrayList<>();
 //        for (LngLat point : path) {
 //            System.out.println(path.size());
-//            points.add(Point.fromLngLat(point.lng(), point.lat()));
+//            points.add(Point.fromLngLat(point.getLng(), point.getLat()));
 //        }
 //        LineString lineString = LineString.fromLngLats(points);
 //        Feature feature = Feature.fromGeometry(lineString);
@@ -274,35 +269,35 @@ public class AppTest {
 
 
  // convert to geojson
-//  LngLat[lng=-3.190578818321228, lat=55.94402412577528]
-//          LngLat[lng=-3.1899887323379517, lat=55.94284650540911]
-//          LngLat[lng=-3.187097311019897, lat=55.94328811724263]
-//          LngLat[lng=-3.187682032585144, lat=55.944477740393744]
-//          LngLat[lng=-3.190578818321228, lat=55.94402412577528]
-//          LngLat[lng=-3.1907182931900024, lat=55.94519570234043]
-//          LngLat[lng=-3.1906163692474365, lat=55.94498241796357]
-//          LngLat[lng=-3.1900262832641597, lat=55.94507554227258]
-//          LngLat[lng=-3.190133571624756, lat=55.94529783810495]
-//          LngLat[lng=-3.1907182931900024, lat=55.94519570234043]
-//          LngLat[lng=-3.189543485641479, lat=55.94552313663306]
-//          LngLat[lng=-3.189382553100586, lat=55.94553214854692]
-//          LngLat[lng=-3.189259171485901, lat=55.94544803726933]
-//          LngLat[lng=-3.1892001628875732, lat=55.94533688994374]
-//          LngLat[lng=-3.189194798469543, lat=55.94519570234043]
-//          LngLat[lng=-3.189135789871216, lat=55.94511759833873]
-//          LngLat[lng=-3.188138008117676, lat=55.9452738061846]
-//          LngLat[lng=-3.1885510683059692, lat=55.946105902745614]
-//          LngLat[lng=-3.1895381212234497, lat=55.94555918427592]
-//          LngLat[lng=-3.189543485641479, lat=55.94552313663306]
-//          LngLat[lng=-3.1876927614212036, lat=55.94520696732767]
-//          LngLat[lng=-3.187555968761444, lat=55.9449621408666]
-//          LngLat[lng=-3.186981976032257, lat=55.94505676722831]
-//          LngLat[lng=-3.1872327625751495, lat=55.94536993377657]
-//          LngLat[lng=-3.1874459981918335, lat=55.9453361389472]
-//          LngLat[lng=-3.1873735785484314, lat=55.94519344934259]
-//          LngLat[lng=-3.1875935196876526, lat=55.94515665035927]
-//          LngLat[lng=-3.187624365091324, lat=55.94521973430925]
-//          LngLat[lng=-3.1876927614212036, lat=55.94520696732767]
+//  LngLat[getLng=-3.190578818321228, getLat=55.94402412577528]
+//          LngLat[getLng=-3.1899887323379517, getLat=55.94284650540911]
+//          LngLat[getLng=-3.187097311019897, getLat=55.94328811724263]
+//          LngLat[getLng=-3.187682032585144, getLat=55.944477740393744]
+//          LngLat[getLng=-3.190578818321228, getLat=55.94402412577528]
+//          LngLat[getLng=-3.1907182931900024, getLat=55.94519570234043]
+//          LngLat[getLng=-3.1906163692474365, getLat=55.94498241796357]
+//          LngLat[getLng=-3.1900262832641597, getLat=55.94507554227258]
+//          LngLat[getLng=-3.190133571624756, getLat=55.94529783810495]
+//          LngLat[getLng=-3.1907182931900024, getLat=55.94519570234043]
+//          LngLat[getLng=-3.189543485641479, getLat=55.94552313663306]
+//          LngLat[getLng=-3.189382553100586, getLat=55.94553214854692]
+//          LngLat[getLng=-3.189259171485901, getLat=55.94544803726933]
+//          LngLat[getLng=-3.1892001628875732, getLat=55.94533688994374]
+//          LngLat[getLng=-3.189194798469543, getLat=55.94519570234043]
+//          LngLat[getLng=-3.189135789871216, getLat=55.94511759833873]
+//          LngLat[getLng=-3.188138008117676, getLat=55.9452738061846]
+//          LngLat[getLng=-3.1885510683059692, getLat=55.946105902745614]
+//          LngLat[getLng=-3.1895381212234497, getLat=55.94555918427592]
+//          LngLat[getLng=-3.189543485641479, getLat=55.94552313663306]
+//          LngLat[getLng=-3.1876927614212036, getLat=55.94520696732767]
+//          LngLat[getLng=-3.187555968761444, getLat=55.9449621408666]
+//          LngLat[getLng=-3.186981976032257, getLat=55.94505676722831]
+//          LngLat[getLng=-3.1872327625751495, getLat=55.94536993377657]
+//          LngLat[getLng=-3.1874459981918335, getLat=55.9453361389472]
+//          LngLat[getLng=-3.1873735785484314, getLat=55.94519344934259]
+//          LngLat[getLng=-3.1875935196876526, getLat=55.94515665035927]
+//          LngLat[getLng=-3.187624365091324, getLat=55.94521973430925]
+//          LngLat[getLng=-3.1876927614212036, getLat=55.94520696732767]
 //          0
 
 // "geometry": {

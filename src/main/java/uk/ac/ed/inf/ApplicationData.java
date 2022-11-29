@@ -8,23 +8,22 @@ import java.net.URL;
 import java.util.Arrays;
 
 public class ApplicationData {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     private final Restaurant[] restaurants;
+    // TODO: maybe change this to a list?
     private Order[] orders;
     private final Area[] noFlyZones;
     private final Area centralArea;
     private final LngLat deliveryOrigin;
 
     // TODO: talk about how we use this instead of singletons in the report
-    public ApplicationData(URL baseAddress, String date, LngLat deliveryOrigin) throws IOException {
-        this.restaurants = MAPPER.readValue(new URL(baseAddress + "restaurants/"), Restaurant[].class);
-        this.orders = MAPPER.readValue(new URL(baseAddress + "orders/" + date), Order[].class);
-        this.noFlyZones = Arrays.stream((MAPPER.readValue(new URL(baseAddress + "noFlyZones"), NamedArea[].class))).map(NamedArea::getArea).toArray(Area[]::new);
-        this.centralArea = new Area(Arrays.stream(MAPPER.readValue(new URL(baseAddress + "centralArea"), NamedLocation[].class)).map(NamedLocation::getLocation).toArray(LngLat[]::new));
+    // TODO: handle exceptions?
+    // TODO: ensure no nulls?
+    public ApplicationData(URL baseAddress, String date, LngLat deliveryOrigin, ObjectMapper objectMapper) throws IOException {
+        this.restaurants = objectMapper.readValue(new URL(baseAddress + "restaurants/"), Restaurant[].class);
+        this.orders = objectMapper.readValue(new URL(baseAddress + "orders/" + date), Order[].class);
+        this.noFlyZones = Arrays.stream((objectMapper.readValue(new URL(baseAddress + "noFlyZones"), Area[].class))).toArray(Area[]::new);
+        this.centralArea = new Area(Arrays.stream(objectMapper.readValue(new URL(baseAddress + "centralArea"), NamedLocation[].class)).map(NamedLocation::getLocation).toArray(LngLat[]::new));
         this.deliveryOrigin = deliveryOrigin;
-//        // validate orders
-//        Arrays.stream(this.orders).forEach(order -> order.setOutcome(order.validateOrder(restaurants)));
-//        this.orders = Arrays.stream(this.orders).filter(order -> order.getOutcome() == OrderOutcome.ValidButNotDelivered).toArray(Order[]::new);
     }
 
     public Restaurant[] getRestaurants() {
@@ -35,6 +34,7 @@ public class ApplicationData {
         return orders;
     }
 
+    // TODO: maybe should use this?
     public void setOrders(Order[] orders) {
         this.orders = orders;
     }

@@ -2,7 +2,7 @@ package uk.ac.ed.inf.Models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.ac.ed.inf.*;
+import uk.ac.ed.inf.Constants;
 
 import java.io.IOException;
 import java.util.*;

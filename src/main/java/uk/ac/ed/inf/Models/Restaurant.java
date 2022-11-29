@@ -3,15 +3,10 @@ package uk.ac.ed.inf.Models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.IOException;
-import java.net.URL;
-
 public class Restaurant {
     private final String name;
     private final LngLat lnglat;
     private final MenuItem[] menuItems;
-    private static Restaurant[] restaurants;
-    private static URL baseAddress;
 
     /**
      * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
@@ -31,6 +26,7 @@ public class Restaurant {
     /**
      * @return name
      */
+    // TODO: removed since unused?
     public String getName() {
         return name;
     }

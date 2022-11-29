@@ -1,6 +1,5 @@
 package uk.ac.ed.inf;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.ed.inf.Models.LngLat;
 
 import java.net.MalformedURLException;

@@ -3,8 +3,7 @@ package uk.ac.ed.inf.Models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import uk.ac.ed.inf.Constants;
-
-import java.util.ArrayList;
+import uk.ac.ed.inf.Models.Input.Area;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record LngLat(double lng, double lat) {
@@ -14,6 +13,7 @@ public record LngLat(double lng, double lat) {
         this.lat = lat;
     }
 
+    // TODO: should return true for boundary points (corners included)
     /**
      * Checks whether the point represented by the LngLat instance is within the given Area or not.
      *
@@ -30,42 +30,6 @@ public record LngLat(double lng, double lat) {
             }
         }
         return result;
-    }
-
-    public ArrayList<LngLat> verticesVisibleFrom(ArrayList<LngLat> vertices, Area[] areas) {
-        ArrayList<LngLat> verticesVisible = new ArrayList<>();
-        for (LngLat vertex : vertices) {
-            if (this.canSee(vertex, areas) && !this.equals(vertex)) {
-                verticesVisible.add(vertex);
-            }
-        }
-        return verticesVisible;
-    }
-
-    public boolean canSee(LngLat vertex, Area[] areas) {
-        // can see if there is no intersection with any of the no-fly zones
-        for (Area area : areas) {
-            if (new Edge(this, vertex).intersectsArea(area)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    // TODO: ordered adjacentLngLats: reorder this list based on the slope of the line between current and goal
-    // in fact, adjacentLngLats should take a slope parameter, and return the list of vertices
-    // sorted by the angle between the line between current and goal, and the line between current and the vertex
-    public ArrayList<LngLat> adjacentLngLats() {
-        // add the LngLat for each Direction
-        ArrayList<LngLat> adjacentLngLats = new ArrayList<>();
-        for (Direction direction : Direction.values()) {
-            // if not hover
-            if (!direction.equals(Direction.HOVER)) {
-                adjacentLngLats.add(this.nextPosition(direction));
-            }
-        }
-        return adjacentLngLats;
     }
 
     /**

@@ -10,5 +10,4 @@ public enum OrderOutcome {
     InvalidPizzaNotDefined,
     InvalidPizzaCount,
     InvalidPizzaCombinationMultipleSuppliers,
-    Undecided // TODO: justify in report
 }

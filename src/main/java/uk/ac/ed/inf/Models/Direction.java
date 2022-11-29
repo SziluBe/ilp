@@ -27,6 +27,10 @@ public enum Direction {
         this.angle = angle;
     }
 
+    public Double getAngle() {
+        return angle;
+    }
+
     /**
      * Returns a LngLat object whose coordinates when summed together with another LngLat object's coordinates would be equal to the coordinates we would
      * end up at after moving from that other LngLat object's coordinates in the compass direction represented by this CmpDir instance.

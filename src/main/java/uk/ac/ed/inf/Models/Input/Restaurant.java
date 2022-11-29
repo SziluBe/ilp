@@ -1,13 +1,10 @@
-package uk.ac.ed.inf.Models;
+package uk.ac.ed.inf.Models.Input;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.ac.ed.inf.Models.LngLat;
 
-public class Restaurant {
-    private final String name;
-    private final LngLat lnglat;
-    private final MenuItem[] menuItems;
-
+public record Restaurant(String name, LngLat lnglat, MenuItem[] menuItems) {
     /**
      * Constructor annotated with @JsonCreator to enable Jackson de-serialisation
      *
@@ -18,30 +15,6 @@ public class Restaurant {
      */
     @JsonCreator
     private Restaurant(@JsonProperty("name") String name, @JsonProperty("longitude") double longitude, @JsonProperty("latitude") double latitude, @JsonProperty("menu") MenuItem[] menuItems) {
-        this.name = name;
-        this.lnglat = new LngLat(longitude, latitude);
-        this.menuItems = menuItems;
-    }
-
-    /**
-     * @return name
-     */
-    // TODO: removed since unused?
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @return lnglat   The restaurant's coordinates as a LngLat object
-     */
-    public LngLat getLnglat() {
-        return lnglat;
-    }
-
-    /**
-     * @return menu
-     */
-    public MenuItem[] getMenu() {
-        return menuItems;
+        this(name, new LngLat(longitude, latitude), menuItems);
     }
 }

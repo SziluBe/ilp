@@ -5,9 +5,14 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 import uk.ac.ed.inf.Models.*;
+import uk.ac.ed.inf.Models.Input.Order;
+import uk.ac.ed.inf.Models.Output.OutFlightPath;
+import uk.ac.ed.inf.Models.Output.OutFlightPathEntry;
 
 import static org.junit.Assert.*;
 
@@ -26,40 +31,58 @@ public class AppTest {
     @Test
     public void testDeliveryPlanner() throws IOException {
         URL baseAddress = Constants.DEFAULT_BASE_ADDRESS;
-        String date = "2023-01-03";
-        LngLat deliveryOrigin = Constants.AT;
-        ObjectMapper objectMapper = new ObjectMapper();
+        LocalDate startDate = LocalDate.of(2023, 1, 11);
+        ArrayList<LocalDate> dates = new ArrayList<>();
+        dates.add(startDate);
+        // generate all date strings from 2023-01-01 to 2023-05-31
+        int i = 1;
+//        while (dates.get(dates.size() - 1).isBefore(LocalDate.of(2023, 6, 1))) {
+//            dates.add(startDate.plusDays(i));
+//            i++;
+//        }
 
-        ApplicationData applicationData = new ApplicationData(baseAddress, date, deliveryOrigin, objectMapper);
-        FlightpathCalculator flightpathCalculator = new FlightpathCalculator(applicationData);
+        for (LocalDate date : dates) {
+            String dateString = date.toString();
+            LngLat deliveryOrigin = Constants.AT;
+            ObjectMapper objectMapper = new ObjectMapper();
 
-        DeliveryPlanner deliveryPlanner = new DeliveryPlanner(applicationData, flightpathCalculator);
-        deliveryPlanner.setOrderOutcomes();
+            ApplicationData applicationData = new ApplicationData(baseAddress, dateString, deliveryOrigin, objectMapper);
+            FlightPathCalculator flightpathCalculator = new FlightPathCalculator(applicationData);
 
-        Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-        OutPutGenerator outPutGenerator = new OutPutGenerator(deliveryPlanner, flightpathCalculator, objectMapper);
-        String deliveries = outPutGenerator.generateDeliveriesOutPut(deliveredOrders);
+            DeliveryPlanner deliveryPlanner = new DeliveryPlanner(applicationData, flightpathCalculator);
 
-        ArrayList<LngLat> flightpath = flightpathCalculator.calculateFlightpath(deliveredOrders);
+            Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
+            OutPutGenerator outPutGenerator = new OutPutGenerator(deliveryPlanner, flightpathCalculator, objectMapper);
 
-        for (int i = 0; i < flightpath.size() - 1; i++) {
-            assert (flightpath.get(i).distanceTo(flightpath.get(i + 1)) >= Constants.MOVE_LENGTH - 0.000001 &&
-                    flightpath.get(i).distanceTo(flightpath.get(i + 1)) <= Constants.MOVE_LENGTH + 0.000001) ||
-                   (flightpath.get(i).distanceTo(flightpath.get(i + 1)) >= 0 - 0.000001 &&
-                    flightpath.get(i).distanceTo(flightpath.get(i + 1)) <= 0 + 0.000001): "Move not correct length " +
-                    flightpath.get(i).distanceTo(flightpath.get(i + 1));
+            OutFlightPath flightpath = outPutGenerator.getFlightPath(deliveredOrders);
+            List<OutFlightPathEntry> flightPathEntries = flightpath.entries();
+
+            for (int j = 0; j < flightpath.entries().size() - 1; j++) {
+                assert (flightPathEntries.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
+                        flightPathEntries.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
+                       (flightPathEntries.get(j).distance() >= 0 - 0.000001 &&
+                        flightPathEntries.get(j).distance() <= 0 + 0.000001) :
+                        "Move not correct length " + flightPathEntries.get(i).distance();
+            }
+
+            String deliveries = outPutGenerator.generateDeliveriesOutPut(deliveredOrders);
+            String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders);
+            String flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
+
+            if (dateString.equals("2023-01-11")) {
+                System.out.println("Deliveries: " + deliveries);
+                System.out.println("Flightpath Json: " + flightPathJson);
+                System.out.println("Flightpath GeoJson: " + flightPathGeoJson);
+                System.out.println("Total distance: " + flightPathEntries.size());
+                System.out.println("Delivered Orders: " + deliveredOrders.length);
+                System.out.println("Valid but undelivered Orders: " + deliveryPlanner.getValidUndeliveredOrders().length);
+                System.out.println("Invalid Orders: " + deliveryPlanner.getInvalidOrders().length);
+            }
+
+            assert 29 == deliveredOrders.length: "Delivered orders not correct length " + dateString;
+            assert 7 == deliveryPlanner.getInvalidOrders().length: "Delivered orders not correct length " + dateString;
+            assert 11 == deliveryPlanner.getValidUndeliveredOrders().length: "Delivered orders not correct length " + dateString;
         }
-
-        String flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
-
-        System.out.println("Deliveries: " + deliveries);
-        System.out.println("Flightpath GeoJson: " + flightPathGeoJson);
-        System.out.println("Total distance: " + flightpath.size());
-        System.out.println("Delivered Orders: " + deliveredOrders.length);
-        assertEquals(29, deliveredOrders.length);
-        System.out.println("Valid but undelivered Orders: " + deliveryPlanner.getValidUndeliveredOrders().length);
-        System.out.println("Invalid Orders: " + deliveryPlanner.getInvalidOrders().length);
-        assertEquals(7, deliveryPlanner.getInvalidOrders().length);
     }
 
 //    @Test
@@ -102,7 +125,7 @@ public class AppTest {
 ////        var flightPaths = waypointPaths;
 //        counter = 0;
 //        for (ArrayList<LngLat> waypointPath : waypointPaths) {
-//            if (counter == 5) { // TODO: A* on steps is too slow >:(
+//            if (counter == 5) {
 //                counter++;
 //                continue;
 //            }

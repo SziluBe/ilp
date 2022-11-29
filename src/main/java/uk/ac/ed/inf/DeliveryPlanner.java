@@ -30,8 +30,8 @@ public class DeliveryPlanner {
 
         for (Order order : appData.orders()) {
             for (Restaurant restaurant : appData.restaurants()) {
-                if (order.orderItems().stream()
-                        .anyMatch(orderItem -> orderItem.equals(restaurant.menuItems()[0].name()))) {
+                if (Arrays.stream(restaurant.menuItems())
+                        .anyMatch(menuItem -> menuItem.name().equals(order.orderItems()[0]))) {
                     orderToRestaurantMap.put(order, restaurant);
                     break;
                 }

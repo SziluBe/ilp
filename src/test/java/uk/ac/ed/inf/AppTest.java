@@ -11,7 +11,6 @@ import java.util.List;
 
 import uk.ac.ed.inf.Models.*;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.Models.Output.OutFlightPath;
 import uk.ac.ed.inf.Models.Output.OutFlightPathEntry;
 
 import static org.junit.Assert.*;
@@ -54,10 +53,9 @@ public class AppTest {
             Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
             OutPutGenerator outPutGenerator = new OutPutGenerator(deliveryPlanner, flightpathCalculator, objectMapper);
 
-            OutFlightPath flightpath = outPutGenerator.getFlightPath(deliveredOrders);
-            List<OutFlightPathEntry> flightPathEntries = flightpath.entries();
+            List<OutFlightPathEntry> flightPathEntries = outPutGenerator.getFlightPath(deliveredOrders);
 
-            for (int j = 0; j < flightpath.entries().size() - 1; j++) {
+            for (int j = 0; j < flightPathEntries.size() - 1; j++) {
                 assert (flightPathEntries.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
                         flightPathEntries.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
                        (flightPathEntries.get(j).distance() >= 0 - 0.000001 &&
@@ -65,7 +63,7 @@ public class AppTest {
                         "Move not correct length " + flightPathEntries.get(i).distance();
             }
 
-            String deliveries = outPutGenerator.generateDeliveriesOutPut(deliveredOrders);
+            String deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders());
             String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders);
             String flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
 
@@ -79,6 +77,8 @@ public class AppTest {
                 System.out.println("Invalid Orders: " + deliveryPlanner.getInvalidOrders().length);
             }
 
+            assert applicationData.orders().length == deliveredOrders.length + deliveryPlanner.getValidUndeliveredOrders().length + deliveryPlanner.getInvalidOrders().length :
+                    "Orders not correctly split into delivered, valid undelivered and invalid";
             assert 29 == deliveredOrders.length: "Delivered orders not correct length " + dateString;
             assert 7 == deliveryPlanner.getInvalidOrders().length: "Delivered orders not correct length " + dateString;
             assert 11 == deliveryPlanner.getValidUndeliveredOrders().length: "Delivered orders not correct length " + dateString;

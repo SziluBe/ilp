@@ -4,6 +4,7 @@ import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.OrderOutcome;
 
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record Order(String orderNo,
@@ -13,7 +14,7 @@ public record Order(String orderNo,
                     String creditCardExpiry,
                     String cvv,
                     int priceTotalInPence,
-                    Set<String> orderItems) {
+                    String[] orderItems) {
 
     public OrderOutcome validateOrder(Restaurant restaurant, Restaurant[] restaurants) {
         if (!this.checkCardNumber()) {
@@ -50,13 +51,14 @@ public record Order(String orderNo,
         return Arrays.stream(restaurant.menuItems())
                 .map(MenuItem::name)
                 .collect(Collectors.toSet())
-                .containsAll(this.orderItems);
+                .containsAll(new HashSet<>(List.of(this.orderItems)));
     }
 
     private int calcTotal(Restaurant restaurant) {
+        Set<String> orderItemsSet = new HashSet<>(List.of(this.orderItems));
         return Arrays.stream(restaurant.menuItems())
                 .filter(menuItem -> { // filter for pizzas whose name appears in the list of names
-                    return this.orderItems.contains(menuItem.name());
+                    return orderItemsSet.contains(menuItem.name());
                 })
                 .map(MenuItem::priceInPence) // get their prices
                 .reduce(0, Integer::sum);
@@ -107,7 +109,7 @@ public record Order(String orderNo,
     }
 
     private boolean checkPizzaCount() {
-        int l = this.orderItems.size();
+        int l = this.orderItems.length;
         return 0 < l && l < 5;
     }
 
@@ -123,7 +125,7 @@ public record Order(String orderNo,
         HashSet<String> allMenuNames = allMenuItems.stream() // we want a HashSet for fast lookup
                 .map(MenuItem::name).collect(Collectors.toCollection(HashSet::new)); // to Set<String>
 
-        return allMenuNames.containsAll(this.orderItems); // ensure every pizza name in the order is present in at least one restaurant's menu
+        return allMenuNames.containsAll(new HashSet<>(List.of(this.orderItems))); // ensure every pizza name in the order is present in at least one restaurant's menu
     }
 
     private boolean checkTotal(Restaurant restaurant) {

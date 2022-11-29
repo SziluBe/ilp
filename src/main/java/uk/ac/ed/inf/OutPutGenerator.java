@@ -9,9 +9,7 @@ import com.mapbox.geojson.Point;
 import uk.ac.ed.inf.Models.FlightPathEntry;
 import uk.ac.ed.inf.Models.Input.Restaurant;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.Models.Output.Deliveries;
 import uk.ac.ed.inf.Models.Output.DeliveryEntry;
-import uk.ac.ed.inf.Models.Output.OutFlightPath;
 import uk.ac.ed.inf.Models.Output.OutFlightPathEntry;
 
 import java.io.IOException;
@@ -50,14 +48,13 @@ public class OutPutGenerator {
                     )
             );
         }
-        Deliveries deliveries = new Deliveries(deliveryEntries.toArray(new DeliveryEntry[0]));
 
-        return objectMapper.writeValueAsString(deliveries);
+        return objectMapper.writeValueAsString(deliveryEntries);
     }
 
     public String generateFlightPathGeoJsonOutPut() {
         Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-        List<OutFlightPathEntry> outFlightPathEntries = getFlightPath(deliveredOrders).entries();
+        List<OutFlightPathEntry> outFlightPathEntries = getFlightPath(deliveredOrders);
 
         List<Point> flightPathPoints = outFlightPathEntries.stream()
                 .map(flightPathEntry -> Point.fromLngLat(flightPathEntry.fromLongitude(),
@@ -71,7 +68,7 @@ public class OutPutGenerator {
         return flightPathGeoJson.toJson();
     }
 
-    public OutFlightPath getFlightPath(Order[] deliveredOrders) {
+    public ArrayList<OutFlightPathEntry> getFlightPath(Order[] deliveredOrders) {
         ArrayList<OutFlightPathEntry> outFlightPathEntries = new ArrayList<>();
         for (Order order : deliveredOrders) {
             Restaurant restaurant = deliveryPlanner.getRestaurantForOrder(order);
@@ -128,6 +125,6 @@ public class OutPutGenerator {
                     System.nanoTime()
             )); // hover on drop-off
         }
-        return new OutFlightPath(outFlightPathEntries);
+        return outFlightPathEntries;
     }
 }

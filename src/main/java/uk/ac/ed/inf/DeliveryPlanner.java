@@ -79,7 +79,7 @@ public class DeliveryPlanner {
         for (Order order : appData.orders()) {
             orderToOutcomeMap.put(
                     order,
-                    order.validateOrder(getRestaurantForOrder(order), appData.restaurants()) // TODO: revise validate function
+                    order.validateOrder(getRestaurantForOrder(order), appData.restaurants())
             );
         }
 

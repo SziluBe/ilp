@@ -12,7 +12,6 @@ import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.Output.DeliveryEntry;
 import uk.ac.ed.inf.Models.Output.OutFlightPathEntry;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,8 +33,7 @@ public class OutPutGenerator {
         return objectMapper.writeValueAsString(getFlightPath(deliveredOrders));
     }
 
-    // TODO: handle exception?
-    public String generateDeliveriesOutPut(Order[] orders) throws IOException {
+    public String generateDeliveriesOutPut(Order[] orders) throws JsonProcessingException {
         ArrayList<DeliveryEntry> deliveryEntries = new ArrayList<>();
         for (Order order : orders) {
             // for invalid orders we don't need to worry about calculating the price,

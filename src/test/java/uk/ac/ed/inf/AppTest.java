@@ -84,6 +84,7 @@ public class AppTest {
                 assertEquals(0, deliveredOrders.length);
             }
             else {
+                assert flightPathEntries.size() == 1922;
                 assert applicationData.orders().length == deliveredOrders.length + deliveryPlanner.getValidUndeliveredOrders().length + deliveryPlanner.getInvalidOrders().length :
                         "Orders not correctly split into delivered, valid undelivered and invalid";
                 assert 29 == deliveredOrders.length : "Delivered orders not correct length " + dateString;

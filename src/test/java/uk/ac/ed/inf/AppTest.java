@@ -67,7 +67,7 @@ public class AppTest {
             String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders);
             String flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
 
-            if (dateString.equals("2023-05-30")) {
+            if (dateString.equals("2023-01-01")) {
                 System.out.println("Deliveries: " + deliveries);
                 System.out.println("Flightpath Json: " + flightPathJson);
                 System.out.println("Flightpath GeoJson: " + flightPathGeoJson);
@@ -89,6 +89,17 @@ public class AppTest {
                 assert 29 == deliveredOrders.length : "Delivered orders not correct length " + dateString;
                 assert 7 == deliveryPlanner.getInvalidOrders().length : "Delivered orders not correct length " + dateString;
                 assert 11 == deliveryPlanner.getValidUndeliveredOrders().length : "Delivered orders not correct length " + dateString;
+                // assert that each OrderOutcome is present for the day
+                for (OrderOutcome outcome : OrderOutcome.values()) {
+                    boolean found = false;
+                    for (Order order : applicationData.orders()) {
+                        if (deliveryPlanner.getOrderOutcome(order).equals(outcome)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert found : "Outcome " + outcome + " not found on " + dateString;
+                }
             }
         }
     }

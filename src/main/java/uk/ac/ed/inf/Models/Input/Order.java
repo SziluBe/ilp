@@ -20,7 +20,6 @@ public record Order(String orderNo,
                     String[] orderItems) {
 
     public OrderOutcome validateOrder(Restaurant restaurant, Restaurant[] restaurants) {
-        // TODO: remove prints?
         if (!this.checkCardNumber()) {
             System.out.println("Invalid card number: " + this.creditCardNumber());
             return OrderOutcome.InvalidCardNumber;
@@ -33,21 +32,21 @@ public record Order(String orderNo,
             System.out.println("Invalid CVV: " + this.cvv());
             return OrderOutcome.InvalidCvv;
         }
-        if (!this.checkTotal(restaurant)) {
-            System.out.println("Invalid total: " + this.priceTotalInPence());
-            return OrderOutcome.InvalidTotal;
-        }
         if (!this.checkPizzasDefined(restaurants)) {
             System.out.println("Invalid pizza not defined: " + Arrays.toString(this.orderItems()));
             return OrderOutcome.InvalidPizzaNotDefined;
+        }
+        if (!this.checkPizzaCombination(restaurant)) {
+            System.out.println("Invalid pizza combination: " + Arrays.toString(this.orderItems()));
+            return OrderOutcome.InvalidPizzaCombinationMultipleSuppliers;
         }
         if (!this.checkPizzaCount()) {
             System.out.println("Invalid pizza count: " + Arrays.toString(this.orderItems()));
             return OrderOutcome.InvalidPizzaCount;
         }
-        if (!this.checkPizzaCombination(restaurant)) {
-            System.out.println("Invalid pizza combination: " + Arrays.toString(this.orderItems()));
-            return OrderOutcome.InvalidPizzaCombinationMultipleSuppliers;
+        if (!this.checkTotal(restaurant)) {
+            System.out.println("Invalid total: " + this.priceTotalInPence());
+            return OrderOutcome.InvalidTotal;
         }
         return OrderOutcome.ValidButNotDelivered;
     }
@@ -66,13 +65,13 @@ public record Order(String orderNo,
     }
 
     private int calcTotal(Restaurant restaurant) {
-        Set<String> orderItemsSet = new HashSet<>(List.of(this.orderItems));
-        return Arrays.stream(restaurant.menuItems())
-                .filter(menuItem -> { // filter for pizzas whose name appears in the list of names
-                    return orderItemsSet.contains(menuItem.name());
-                })
-                .map(MenuItem::priceInPence) // get their prices
-                .reduce(0, Integer::sum);
+        return Arrays.stream(this.orderItems())
+                .mapToInt(item -> Arrays.stream(restaurant.menuItems())
+                        .filter(menuItem -> menuItem.name().equals(item)) // each restaurant should only have
+                                                                          // one menu item with a given name
+                        .mapToInt(MenuItem::priceInPence)
+                        .sum())
+                .sum() + Constants.DELIVERY_CHARGE;
     }
 
     private List<MenuItem> getAllMenuItems(Restaurant[] restaurants) {
@@ -86,7 +85,6 @@ public record Order(String orderNo,
     }
 
 
-    // stuff that'll probably be useful later
     // card checking using Luhn algorithm
     private boolean checkCardNumber() {
         for (char c : this.creditCardNumber().toCharArray()) {
@@ -114,8 +112,7 @@ public record Order(String orderNo,
 
     private boolean checkExpiryDate() {
         boolean checkLength = this.creditCardExpiry.length() == 5;
-        if (checkLength && this.creditCardExpiry.matches("(10|11|12|0[1-9])/(2[3-9]|[3-9][0-9])")) { // TODO: revise
-            // TODO: reformat lines
+        if (checkLength && this.creditCardExpiry.matches("(10|11|12|0[1-9])/(2[3-9]|[3-9][0-9])")) {
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/yyyy");
             try {
                 TemporalAccessor expiryDate = dateFormat.parse(this.creditCardExpiry.substring(0, 2) + "/20"
@@ -169,7 +166,7 @@ public record Order(String orderNo,
             return false;
         }
 
-        return calcTotal(restaurant) + Constants.DELIVERY_CHARGE == this.priceTotalInPence;
+        return calcTotal(restaurant) == this.priceTotalInPence;
     }
 
 }

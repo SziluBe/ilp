@@ -3,6 +3,9 @@ package uk.ac.ed.inf.Models.Input;
 import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.OrderOutcome;
 
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,25 +20,33 @@ public record Order(String orderNo,
                     String[] orderItems) {
 
     public OrderOutcome validateOrder(Restaurant restaurant, Restaurant[] restaurants) {
+        // TODO: remove prints?
         if (!this.checkCardNumber()) {
+            System.out.println("Invalid card number: " + this.creditCardNumber());
             return OrderOutcome.InvalidCardNumber;
         }
         if (!this.checkExpiryDate()) {
+            System.out.println("Invalid expiry date: " + this.creditCardExpiry());
             return OrderOutcome.InvalidExpiryDate;
         }
         if (!this.checkCvv()) {
+            System.out.println("Invalid CVV: " + this.cvv());
             return OrderOutcome.InvalidCvv;
         }
         if (!this.checkTotal(restaurant)) {
+            System.out.println("Invalid total: " + this.priceTotalInPence());
             return OrderOutcome.InvalidTotal;
         }
         if (!this.checkPizzasDefined(restaurants)) {
+            System.out.println("Invalid pizza not defined: " + Arrays.toString(this.orderItems()));
             return OrderOutcome.InvalidPizzaNotDefined;
         }
         if (!this.checkPizzaCount()) {
+            System.out.println("Invalid pizza count: " + Arrays.toString(this.orderItems()));
             return OrderOutcome.InvalidPizzaCount;
         }
         if (!this.checkPizzaCombination(restaurant)) {
+            System.out.println("Invalid pizza combination: " + Arrays.toString(this.orderItems()));
             return OrderOutcome.InvalidPizzaCombinationMultipleSuppliers;
         }
         return OrderOutcome.ValidButNotDelivered;
@@ -78,6 +89,12 @@ public record Order(String orderNo,
     // stuff that'll probably be useful later
     // card checking using Luhn algorithm
     private boolean checkCardNumber() {
+        for (char c : this.creditCardNumber().toCharArray()) {
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+        }
+
         int sum = 0;
         boolean alternate = false;
         for (int i = this.creditCardNumber.length() - 1; i >= 0; i--) {
@@ -91,17 +108,33 @@ public record Order(String orderNo,
             sum += n;
             alternate = !alternate;
         }
-        // 13/16 for Visa, 15 for Amex, 16 for Mastercard
-        return (sum % 10 == 0) && (this.creditCardNumber.length() == 16 || this.creditCardNumber.length() == 13 || this.creditCardNumber.length() == 15);
+        // 16 for Visa, 16 for Mastercard -> no 13 digit Visa, 15 digit Amex, or any other
+        return (sum % 10 == 0) && this.creditCardNumber.length() == 16;
     }
 
-    private boolean checkExpiryDate() { // TODO: this should validate with the day of the order
+    private boolean checkExpiryDate() {
         boolean checkLength = this.creditCardExpiry.length() == 5;
-        if (checkLength) {
-            return this.creditCardExpiry.matches("(10|11|12|0[1-9])/(2[3-9]|[3-9][0-9])");  // Technically this will become wrong if we change centuries, but for the time being it is safer.
-            // This is a reminder to change it if we get to that. Sorry 2100s developers, and hello from the past :)
-            // No need to check for the edge case where we are in 2023 but before the service's starting date since it starts on January 1st :)
-        } else return false;
+        if (checkLength && this.creditCardExpiry.matches("(10|11|12|0[1-9])/(2[3-9]|[3-9][0-9])")) { // TODO: revise
+            // TODO: reformat lines
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/yyyy");
+            try {
+                TemporalAccessor expiryDate = dateFormat.parse(this.creditCardExpiry.substring(0, 2) + "/20"
+                        + this.creditCardExpiry.substring(3));
+                    try {
+                        TemporalAccessor orderDate = dateFormat.parse(this.orderDate.substring(5, 7) + "/"
+                                + this.orderDate.substring(0, 4));
+                        if (expiryDate.get(ChronoField.YEAR) >= orderDate.get(ChronoField.YEAR)) {
+                            return true;
+                        }
+                        return expiryDate.get(ChronoField.MONTH_OF_YEAR) >= orderDate.get(ChronoField.MONTH_OF_YEAR);
+                    } catch (Exception e) {
+                        return false;
+                    }
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     private boolean checkCvv() {

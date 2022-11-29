@@ -7,6 +7,8 @@
     <list default="true" id="fb7dc8e7-b36c-4d5a-ae87-fd1f150579b7" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Input/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Input/Order.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/OrderOutcome.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/OrderOutcome.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +134,7 @@
       <workItem from="1669669553487" duration="6901000" />
       <workItem from="1669676498989" duration="7708000" />
       <workItem from="1669684261610" duration="13052000" />
-      <workItem from="1669712106918" duration="2078000" />
+      <workItem from="1669712106918" duration="6607000" />
     </task>
     <task id="LOCAL-00001" summary="first cw1 progress (need docs/confusing parts)">
       <created>1663609872521</created>
@@ -253,7 +255,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669713953078</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="fixes: order stuff">
+      <created>1669714601590</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1669714601590</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -285,7 +294,8 @@
     <MESSAGE value="no Warnings!!! POG" />
     <MESSAGE value="almost no Warnings!!! POG" />
     <MESSAGE value="fixes: output to json list, order stuff" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixes: output to json list, order stuff" />
+    <MESSAGE value="fixes: order stuff" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixes: order stuff" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

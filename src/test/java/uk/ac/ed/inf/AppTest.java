@@ -30,12 +30,12 @@ public class AppTest {
     @Test
     public void testDeliveryPlanner() throws IOException {
         URL baseAddress = Constants.DEFAULT_BASE_ADDRESS;
-        LocalDate startDate = LocalDate.of(2023, 1, 11);
+        LocalDate startDate = LocalDate.of(2023, 1, 1);
         ArrayList<LocalDate> dates = new ArrayList<>();
         dates.add(startDate);
         // generate all date strings from 2023-01-01 to 2023-05-31
         int i = 1;
-        while (dates.get(dates.size() - 1).isBefore(LocalDate.of(2023, 6, 1))) {
+        while (dates.get(dates.size() - 1).isBefore(LocalDate.of(2023, 5, 31))) {
             dates.add(startDate.plusDays(i));
             i++;
         }
@@ -67,7 +67,7 @@ public class AppTest {
             String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders);
             String flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
 
-            if (dateString.equals("2023-01-11")) {
+            if (dateString.equals("2023-05-30")) {
                 System.out.println("Deliveries: " + deliveries);
                 System.out.println("Flightpath Json: " + flightPathJson);
                 System.out.println("Flightpath GeoJson: " + flightPathGeoJson);
@@ -77,11 +77,19 @@ public class AppTest {
                 System.out.println("Invalid Orders: " + deliveryPlanner.getInvalidOrders().length);
             }
 
-            assert applicationData.orders().length == deliveredOrders.length + deliveryPlanner.getValidUndeliveredOrders().length + deliveryPlanner.getInvalidOrders().length :
-                    "Orders not correctly split into delivered, valid undelivered and invalid";
-            assert 29 == deliveredOrders.length: "Delivered orders not correct length " + dateString;
-            assert 7 == deliveryPlanner.getInvalidOrders().length: "Delivered orders not correct length " + dateString;
-            assert 11 == deliveryPlanner.getValidUndeliveredOrders().length: "Delivered orders not correct length " + dateString;
+            if (dateString.equals("2023-05-31")) {
+                assertEquals(0, deliveryPlanner.getValidUndeliveredOrders().length);
+                assertEquals(0, deliveryPlanner.getInvalidOrders().length);
+                assertEquals(0, flightPathEntries.size());
+                assertEquals(0, deliveredOrders.length);
+            }
+            else {
+                assert applicationData.orders().length == deliveredOrders.length + deliveryPlanner.getValidUndeliveredOrders().length + deliveryPlanner.getInvalidOrders().length :
+                        "Orders not correctly split into delivered, valid undelivered and invalid";
+                assert 29 == deliveredOrders.length : "Delivered orders not correct length " + dateString;
+                assert 7 == deliveryPlanner.getInvalidOrders().length : "Delivered orders not correct length " + dateString;
+                assert 11 == deliveryPlanner.getValidUndeliveredOrders().length : "Delivered orders not correct length " + dateString;
+            }
         }
     }
 

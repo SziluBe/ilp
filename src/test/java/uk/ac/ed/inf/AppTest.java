@@ -7,11 +7,18 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlanner;
+import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlannerFactory;
 import uk.ac.ed.inf.Models.*;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.Models.Output.OutFlightPathEntry;
+import uk.ac.ed.inf.OutPutGenerator.OutPutGenerator;
+import uk.ac.ed.inf.OutPutGenerator.OutPutGeneratorFactory;
+import uk.ac.ed.inf.PathFinder.PathFinder;
+import uk.ac.ed.inf.PathFinder.PathFinderFactory;
+import uk.ac.ed.inf.Stores.ApplicationData;
 
 import static org.junit.Assert.*;
 
@@ -46,21 +53,21 @@ public class AppTest {
             ObjectMapper objectMapper = new ObjectMapper();
 
             ApplicationData applicationData = new ApplicationData(baseAddress, dateString, deliveryOrigin, objectMapper);
-            FlightPathCalculator flightpathCalculator = new FlightPathCalculator(applicationData);
+            PathFinder flightpathFinder = PathFinderFactory.getPathFinder(applicationData);
 
-            DeliveryPlanner deliveryPlanner = new DeliveryPlanner(applicationData, flightpathCalculator);
+            DeliveryPlanner deliveryPlanner = DeliveryPlannerFactory.getDeliveryPlanner(applicationData, flightpathFinder);
 
             Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-            OutPutGenerator outPutGenerator = new OutPutGenerator(deliveryPlanner, flightpathCalculator, objectMapper);
+            OutPutGenerator outPutGenerator = OutPutGeneratorFactory.getOutPutGenerator(deliveryPlanner);
 
-            List<OutFlightPathEntry> flightPathEntries = outPutGenerator.generateOutFlightPath(deliveredOrders);
+            List<Step> steps = Arrays.stream(deliveredOrders).map(deliveryPlanner::getPathForOrder).flatMap(List::stream).toList();
 
-            for (int j = 0; j < flightPathEntries.size() - 1; j++) {
-                assert (flightPathEntries.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
-                        flightPathEntries.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
-                       (flightPathEntries.get(j).distance() >= 0 - 0.000001 &&
-                        flightPathEntries.get(j).distance() <= 0 + 0.000001) :
-                        "Move not correct length " + flightPathEntries.get(j).distance();
+            for (int j = 0; j < steps.size() - 1; j++) {
+                assert (steps.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
+                        steps.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
+                       (steps.get(j).distance() >= 0 - 0.000001 &&
+                        steps.get(j).distance() <= 0 + 0.000001) :
+                        "Move not correct length " + steps.get(j).distance();
             }
 
             String deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders());
@@ -71,7 +78,7 @@ public class AppTest {
                 System.out.println("Deliveries: " + deliveries);
                 System.out.println("Flightpath Json: " + flightPathJson);
                 System.out.println("Flightpath GeoJson: " + flightPathGeoJson);
-                System.out.println("Total distance: " + flightPathEntries.size());
+                System.out.println("Total distance: " + steps.size());
                 System.out.println("Delivered Orders: " + deliveredOrders.length);
                 System.out.println("Valid but undelivered Orders: " + deliveryPlanner.getValidUndeliveredOrders().length);
                 System.out.println("Invalid Orders: " + deliveryPlanner.getInvalidOrders().length);
@@ -80,11 +87,11 @@ public class AppTest {
             if (dateString.equals("2023-05-31")) {
                 assertEquals(0, deliveryPlanner.getValidUndeliveredOrders().length);
                 assertEquals(0, deliveryPlanner.getInvalidOrders().length);
-                assertEquals(0, flightPathEntries.size());
+                assertEquals(0, steps.size());
                 assertEquals(0, deliveredOrders.length);
             }
             else {
-                assert flightPathEntries.size() == 1922;
+                assert steps.size() == 1922 : "Total distance not correct " + steps.size();
                 assert applicationData.orders().length == deliveredOrders.length + deliveryPlanner.getValidUndeliveredOrders().length + deliveryPlanner.getInvalidOrders().length :
                         "Orders not correctly split into delivered, valid undelivered and invalid";
                 assert 29 == deliveredOrders.length : "Delivered orders not correct length " + dateString;

@@ -1,61 +1,78 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.PathFinder;
 
+import uk.ac.ed.inf.Stores.ApplicationData;
+import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.*;
 import uk.ac.ed.inf.Models.Input.Area;
 import uk.ac.ed.inf.Models.Input.Restaurant;
 
 import java.util.*;
 
-public class FlightPathCalculator {
-    private final Map<Restaurant, List<FlightPathEntry>> restaurantsPathsMap = new java.util.HashMap<>();
+public class AStarPathFinder implements PathFinder {
+    private final Map<Restaurant, List<Step>> restaurantsPathsMap = new java.util.HashMap<>();
     private final Map<Restaurant, Boolean> restaurantsPathCalculatedMap = new java.util.HashMap<>();
     private final Area[] noFlyZones;
     private final Area centralArea;
     private final LngLat deliveryOrigin;
 
-    public FlightPathCalculator(ApplicationData applicationData) {
+    // TODO: mention strategies in report
+    public AStarPathFinder(ApplicationData applicationData) {
         this.noFlyZones = applicationData.noFlyZones();
         this.centralArea = applicationData.centralArea();
         this.deliveryOrigin = applicationData.deliveryOrigin();
     }
 
-    // TODO: make aStar a strategy
     // TODO: document that this can return null
-    public List<FlightPathEntry> getFlightPath(Restaurant restaurant) {
+    public List<Step> getFlightPath(Restaurant restaurant) {
         Boolean isPathCalculated = restaurantsPathCalculatedMap.get(restaurant);
         if (isPathCalculated == null || !isPathCalculated) { // this won't throw an error due to short-circuiting
             LngLat target = restaurant.lnglat();
-            List<FlightPathEntry> flightPath = aStar(deliveryOrigin, target);
+            List<Step> flightPath = aStar(deliveryOrigin, target);
+            if (flightPath == null || flightPath.size() == 0) {
+                return null;
+            }
+
+            List<Step> reversedSteps = new ArrayList<>();
+            for (int i = flightPath.size() - 1; i >= 0; i--) {
+                reversedSteps.add(flightPath.get(i).getReverse());
+            }
+
+            LngLat firstLngLat = flightPath.get(0).from();
+            LngLat lastLngLat = flightPath.get(flightPath.size() - 1).to();
+
+            flightPath.add(new Step(lastLngLat, Constants.HOVER, lastLngLat)); // hover on pickup
+            flightPath.addAll(reversedSteps);
+            flightPath.add(new Step(firstLngLat, Constants.HOVER, firstLngLat)); // hover on drop-off
 
             restaurantsPathsMap.put(restaurant, flightPath);
             restaurantsPathCalculatedMap.put(restaurant, true);
-//            System.out.println("Calculated flightpath for " + restaurant.name() + " length: " + flightPath.size());
+            System.out.println("Calculated flightpath for " + restaurant.name() + " length: " + flightPath.size());
         }
 
         return restaurantsPathsMap.get(restaurant);
     }
 
-    private List<FlightPathEntry> reconstructPath(LngLat current,
-                                                          Map<LngLat, LngLat> cameFrom,
-                                                          Map<LngLat, Direction> stepDirs) {
-        List<FlightPathEntry> totalPath = new ArrayList<>();
+    private List<Step> reconstructPath(LngLat current,
+                                       Map<LngLat, LngLat> cameFrom,
+                                       Map<LngLat, Direction> stepDirs) {
+        List<Step> totalPath = new ArrayList<>();
         while (cameFrom.containsKey(current)) {
             LngLat previous = cameFrom.get(current);
             Direction stepDir = stepDirs.get(current);
-            FlightPathEntry flightPathEntry = new FlightPathEntry(
+            Step step = new Step(
                     previous,
                     stepDir,
                     current
             );
-            totalPath.add(0, flightPathEntry);
+            totalPath.add(0, step);
             current = cameFrom.get(current);
         }
         return totalPath;
     }
 
-    // TODO: credit wikipedia
+    //  based on pseudocode from https://en.wikipedia.org/wiki/A*_search_algorithm
     // TODO: split into smaller methods; e.g. getNeighbours
-    private List<FlightPathEntry> aStar(LngLat start, LngLat goal) {
+    private List<Step> aStar(LngLat start, LngLat goal) {
         // For node n, cameFrom.get(n) is the node immediately preceding it on the cheapest path from start
         // to n currently known.
         var cameFrom = new HashMap<LngLat, LngLat>();

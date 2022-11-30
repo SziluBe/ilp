@@ -3,6 +3,7 @@ package uk.ac.ed.inf.Models.Input;
 import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.OrderOutcome;
 
+import java.time.DateTimeException;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
@@ -21,7 +22,7 @@ public record Order(String orderNo,
 
     public OrderOutcome validateOrder(Restaurant restaurant, MenuItem[] menuItems) {
         if (restaurant == null || menuItems == null) {
-            System.out.println("Invalid order: null input to validateOrder");
+            System.out.println("Invalid validation call: restaurant or menuItems is null"); // TODO: make this an exception?
             return OrderOutcome.Invalid;
         }
         if (!this.checkCardNumber()) {
@@ -73,7 +74,6 @@ public record Order(String orderNo,
     }
 
 
-    // card checking using Luhn algorithm
     private boolean checkCardNumber() {
         if (this.creditCardNumber().length() != 16) {
             return false;
@@ -91,6 +91,7 @@ public record Order(String orderNo,
             return false;
         }
 
+        // card checking using Luhn algorithm
         int sum = 0;
         boolean alternate = false;
         for (int i = this.creditCardNumber.length() - 1; i >= 0; i--) {
@@ -104,32 +105,25 @@ public record Order(String orderNo,
             sum += n;
             alternate = !alternate;
         }
-            return (sum % 10 == 0);
+        return (sum % 10 == 0);
     }
 
-    // TODO: cleanup
-    private boolean checkExpiryDate() {
-        boolean checkLength = this.creditCardExpiry.length() == 5;
-        if (checkLength && this.creditCardExpiry.matches("(10|11|12|0[1-9])/(2[3-9]|[3-9][0-9])")) {
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/yyyy");
-            try {
-                TemporalAccessor expiryDate = dateFormat.parse(this.creditCardExpiry.substring(0, 2) + "/20"
-                        + this.creditCardExpiry.substring(3));
-                    try {
-                        TemporalAccessor orderDate = dateFormat.parse(this.orderDate.substring(5, 7) + "/"
-                                + this.orderDate.substring(0, 4));
-                        if (expiryDate.get(ChronoField.YEAR) >= orderDate.get(ChronoField.YEAR)) {
-                            return true;
-                        }
-                        return expiryDate.get(ChronoField.MONTH_OF_YEAR) >= orderDate.get(ChronoField.MONTH_OF_YEAR);
-                    } catch (Exception e) {
-                        return false;
-                    }
-            } catch (Exception e) {
-                return false;
+    private boolean checkExpiryDate() throws DateTimeException {
+        DateTimeFormatter orderDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter expiryDateFormatter = DateTimeFormatter.ofPattern("MM/yy");
+        TemporalAccessor orderDateAccessor = orderDateFormatter.parse(this.orderDate());
+        try {
+            // this will throw a DateTimeException if the expiry date is invalid
+            TemporalAccessor expiryDate = expiryDateFormatter.parse(this.creditCardExpiry());
+            if (expiryDate.get(ChronoField.YEAR) > orderDateAccessor.get(ChronoField.YEAR)) {
+                return true;
             }
+            return expiryDate.get(ChronoField.MONTH_OF_YEAR) >= orderDateAccessor.get(ChronoField.MONTH_OF_YEAR) &&
+                    expiryDate.get(ChronoField.YEAR) == orderDateAccessor.get(ChronoField.YEAR);
+        // if the expiry date is invalid, we return false
+        } catch (DateTimeException e) {
+            return false;
         }
-        return false;
     }
 
     private boolean checkCvv() {
@@ -142,11 +136,11 @@ public record Order(String orderNo,
     }
 
     private boolean checkPizzasDefined(MenuItem[] menuItems) {
-        Set<String> allMenuNames = Arrays.stream(menuItems) // we want a HashSet for fast lookup
+        Set<String> allItemNames = Arrays.stream(menuItems) // we want a HashSet for fast lookup
                 .map(MenuItem::name).collect(Collectors.toCollection(HashSet::new)); // to Set<String>
 
         // for containsAll only "this" needs to be a Set
-        return allMenuNames.containsAll(List.of(this.orderItems)); // ensure every pizza name in the order is present in at least one restaurant's menu
+        return allItemNames.containsAll(List.of(this.orderItems)); // ensure every pizza name in the order is present in at least one restaurant's menu
     }
 
     private boolean checkTotal(Restaurant restaurant) {

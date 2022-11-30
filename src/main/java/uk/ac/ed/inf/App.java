@@ -2,10 +2,17 @@ package uk.ac.ed.inf;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlanner;
+import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlannerFactory;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.LngLat;
 import uk.ac.ed.inf.Models.OrderOutcome;
-import uk.ac.ed.inf.Models.Output.OutFlightPathEntry;
+import uk.ac.ed.inf.Models.Step;
+import uk.ac.ed.inf.OutPutGenerator.OutPutGenerator;
+import uk.ac.ed.inf.OutPutGenerator.OutPutGeneratorFactory;
+import uk.ac.ed.inf.PathFinder.PathFinder;
+import uk.ac.ed.inf.PathFinder.PathFinderFactory;
+import uk.ac.ed.inf.Stores.ApplicationData;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -19,7 +26,7 @@ import java.util.List;
  */
 public class App 
 {
-    public static void main( String[] args ) {
+    public static void main( String[] args ) throws JsonProcessingException {
         // TODO: command line arguments -> validate them also (including date)
         // TODO: generate output files
         // TODO: documentation
@@ -45,21 +52,23 @@ public class App
         } catch (IOException e) {
             throw new RuntimeException(e); // TODO: better exception handling (stderr)
         }
-        FlightPathCalculator flightpathCalculator = new FlightPathCalculator(applicationData);
+        PathFinder flightpathFinder = PathFinderFactory.getPathFinder(applicationData);
 
-        DeliveryPlanner deliveryPlanner = new DeliveryPlanner(applicationData, flightpathCalculator);
+        DeliveryPlanner deliveryPlanner = DeliveryPlannerFactory.getDeliveryPlanner(applicationData, flightpathFinder);
 
         Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-        OutPutGenerator outPutGenerator = new OutPutGenerator(deliveryPlanner, flightpathCalculator, objectMapper);
+        OutPutGenerator outPutGenerator = OutPutGeneratorFactory.getOutPutGenerator(deliveryPlanner);
 
-        List<OutFlightPathEntry> flightPathEntries = outPutGenerator.generateOutFlightPath(deliveredOrders);
+        for (Order order : deliveredOrders) {
+            List<Step> steps = deliveryPlanner.getPathForOrder(order);
 
-        for (int j = 0; j < flightPathEntries.size() - 1; j++) {
-            assert (flightPathEntries.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
-                    flightPathEntries.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
-                    (flightPathEntries.get(j).distance() >= 0 - 0.000001 &&
-                            flightPathEntries.get(j).distance() <= 0 + 0.000001) :
-                    "Move not correct length " + flightPathEntries.get(j).distance();
+            for (int j = 0; j < steps.size() - 1; j++) {
+                assert (steps.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
+                        steps.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
+                        (steps.get(j).distance() >= 0 - 0.000001 &&
+                                steps.get(j).distance() <= 0 + 0.000001) :
+                        "Move not correct length " + steps.get(j).distance();
+            }
         }
 
         String deliveries;
@@ -79,13 +88,13 @@ public class App
         System.out.println("Deliveries: " + deliveries);
         System.out.println("Flightpath Json: " + flightPathJson);
         System.out.println("Flightpath GeoJson: " + flightPathGeoJson);
-        System.out.println("Total distance: " + flightPathEntries.size());
+//        System.out.println("Total distance: " + flightPathEntries.size());
         System.out.println("Delivered Orders: " + deliveredOrders.length);
         System.out.println("Valid but undelivered Orders: " + deliveryPlanner.getValidUndeliveredOrders().length);
         System.out.println("Invalid Orders: " + deliveryPlanner.getInvalidOrders().length);
 
         // TODO: remove this
-        assert flightPathEntries.size() == 1922;
+//        assert flightPathEntries.size() == 1922;
         assert applicationData.orders().length == deliveredOrders.length + deliveryPlanner.getValidUndeliveredOrders().length + deliveryPlanner.getInvalidOrders().length :
                 "Orders not correctly split into delivered, valid undelivered and invalid";
         assert 29 == deliveredOrders.length : "Delivered orders not correct length " + dateString;

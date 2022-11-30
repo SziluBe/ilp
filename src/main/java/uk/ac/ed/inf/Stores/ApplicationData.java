@@ -1,4 +1,4 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.Stores;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.ed.inf.Models.*;
@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] noFlyZones, Area centralArea, LngLat deliveryOrigin) {
     // TODO: talk about how we use this instead of singletons in the report
+    // TODO: validate input data, throw exceptions if invalid
     public ApplicationData(URL baseAddress, String date, LngLat deliveryOrigin, ObjectMapper objectMapper) throws IOException {
         this(
                 objectMapper.readValue(new URL(baseAddress + "restaurants/"), Restaurant[].class),

@@ -1,17 +1,20 @@
-package uk.ac.ed.inf;
+package uk.ac.ed.inf.DeliveryPlanner;
 
-import uk.ac.ed.inf.Models.FlightPathEntry;
+import uk.ac.ed.inf.Stores.ApplicationData;
+import uk.ac.ed.inf.Constants;
+import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.Models.Input.MenuItem;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.OrderOutcome;
 import uk.ac.ed.inf.Models.Input.Restaurant;
+import uk.ac.ed.inf.PathFinder.PathFinder;
 
 import java.util.*;
 
-public class DeliveryPlanner {
+public class DefaultDeliveryPlanner implements DeliveryPlanner {
     // TODO: mention in docs that all the "get..." methods can return nulls or collections with nulls present
     // TODO: javadocs for classes, not just methods
-    private final FlightPathCalculator flightpathCalculator;
+    private final PathFinder flightpathFinder;
     private final ApplicationData appData;
     private final Map<Order, Restaurant> orderToRestaurantMap = new HashMap<>();
     private boolean isRestaurantMapCalculated = false;
@@ -20,9 +23,9 @@ public class DeliveryPlanner {
     private final Map<Order, OrderOutcome> orderToOutcomeMap = new HashMap<>();
     private boolean isOutcomeMapCalculated = false;
 
-    public DeliveryPlanner(ApplicationData appData, FlightPathCalculator flightpathCalculator) {
+    public DefaultDeliveryPlanner(ApplicationData appData, PathFinder flightpathFinder) {
         this.appData = appData;
-        this.flightpathCalculator = flightpathCalculator;
+        this.flightpathFinder = flightpathFinder;
     }
 
     private void assignRestaurantsToOrders() {
@@ -43,7 +46,7 @@ public class DeliveryPlanner {
         isRestaurantMapCalculated = true;
     }
 
-    public Restaurant getRestaurantForOrder(Order order) {
+    private Restaurant getRestaurantForOrder(Order order) {
         // ensure all orders have a restaurant assigned
         assignRestaurantsToOrders();
         return orderToRestaurantMap.get(order);
@@ -61,11 +64,11 @@ public class DeliveryPlanner {
             if (restaurant == null) { // TODO: comment
                 continue;
             }
-            List<FlightPathEntry> flightPathEntries = flightpathCalculator.getFlightPath(restaurant);
+            List<Step> flightPathEntries = flightpathFinder.getFlightPath(restaurant);
             if (flightPathEntries != null) { // TODO: comment
                 orderToRequiredStepsMap.put(
                         order,
-                        2 * flightPathEntries.size() + 2
+                        flightPathEntries.size()
                 );
             }
         }
@@ -103,20 +106,29 @@ public class DeliveryPlanner {
                 .toArray(Order[]::new);
         // sort orders by steps
         // calculate final outcomes
-        int steps = 0;
+        int nSteps = 0;
         for (Order order : deliverableOrders) {
             if (orderToOutcomeMap.get(order) == OrderOutcome.ValidButNotDelivered) {
                 Integer addedSteps = getRequiredStepsForOrder(order);
                 if (addedSteps != null) {
-                    int newSteps = steps + addedSteps;
+                    int newSteps = nSteps + addedSteps;
                     if (newSteps <= Constants.MAX_MOVES) {
                         orderToOutcomeMap.put(order, OrderOutcome.Delivered);
-                        steps = newSteps;
+                        nSteps = newSteps;
                     }
                 }
             }
         }
         isOutcomeMapCalculated = true;
+    }
+
+    public List<Step> getPathForOrder(Order order) {
+        Restaurant restaurant = getRestaurantForOrder(order);
+        if (restaurant == null) {
+            return null;
+        }
+
+        return flightpathFinder.getFlightPath(restaurant);
     }
 
     public OrderOutcome getOrderOutcome(Order order) {

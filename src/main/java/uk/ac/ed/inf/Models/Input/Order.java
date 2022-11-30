@@ -19,7 +19,11 @@ public record Order(String orderNo,
                     int priceTotalInPence,
                     String[] orderItems) {
 
-    public OrderOutcome validateOrder(Restaurant restaurant, Restaurant[] restaurants) {
+    public OrderOutcome validateOrder(Restaurant restaurant, MenuItem[] menuItems) {
+        if (restaurant == null || menuItems == null) {
+            System.out.println("Invalid order: null input to validateOrder");
+            return OrderOutcome.Invalid;
+        }
         if (!this.checkCardNumber()) {
             System.out.println("Invalid card number: " + this.creditCardNumber());
             return OrderOutcome.InvalidCardNumber;
@@ -32,7 +36,7 @@ public record Order(String orderNo,
             System.out.println("Invalid CVV: " + this.cvv());
             return OrderOutcome.InvalidCvv;
         }
-        if (!this.checkPizzasDefined(restaurants)) {
+        if (!this.checkPizzasDefined(menuItems)) {
             System.out.println("Invalid pizza not defined: " + Arrays.toString(this.orderItems()));
             return OrderOutcome.InvalidPizzaNotDefined;
         }
@@ -52,12 +56,6 @@ public record Order(String orderNo,
     }
 
     private boolean checkPizzaCombination(Restaurant restaurant) {
-        try { // Make sure we don't crash if we somehow get a null value in restaurant
-            assert restaurant != null;
-        } catch (AssertionError e) {
-            return false;
-        }
-
         return Arrays.stream(restaurant.menuItems())
                 .map(MenuItem::name)
                 .collect(Collectors.toSet())
@@ -74,23 +72,23 @@ public record Order(String orderNo,
                 .sum() + Constants.DELIVERY_CHARGE;
     }
 
-    private List<MenuItem> getAllMenuItems(Restaurant[] restaurants) {
-        return Arrays.stream(restaurants)
-                .map(Restaurant::menuItems) // map to Arrays
-                .map(Arrays::asList) // then to Lists
-                .reduce(new ArrayList<>(), (runningList, newMenuArray) -> { // concatenate
-                    runningList.addAll(newMenuArray);
-                    return runningList;
-                });
-    }
-
 
     // card checking using Luhn algorithm
     private boolean checkCardNumber() {
+        if (this.creditCardNumber().length() != 16) {
+            return false;
+        }
         for (char c : this.creditCardNumber().toCharArray()) {
             if (!Character.isDigit(c)) {
                 return false;
             }
+        }
+        // 16 for Visa, 16 for Mastercard -> no 13 digit Visa, 15 digit Amex, or any other
+        // first digit 2 or 5 for Mastercard, 4 for Visa
+        if (!((this.creditCardNumber.startsWith("4") || this.creditCardNumber.startsWith("5")) ||
+                (Integer.parseInt(this.creditCardNumber.substring(0, 6)) >= 222100
+                        && Integer.parseInt(this.creditCardNumber.substring(0, 6)) <= 272099))) {
+            return false;
         }
 
         int sum = 0;
@@ -106,10 +104,10 @@ public record Order(String orderNo,
             sum += n;
             alternate = !alternate;
         }
-        // 16 for Visa, 16 for Mastercard -> no 13 digit Visa, 15 digit Amex, or any other
-        return (sum % 10 == 0) && this.creditCardNumber.length() == 16;
+            return (sum % 10 == 0);
     }
 
+    // TODO: cleanup
     private boolean checkExpiryDate() {
         boolean checkLength = this.creditCardExpiry.length() == 5;
         if (checkLength && this.creditCardExpiry.matches("(10|11|12|0[1-9])/(2[3-9]|[3-9][0-9])")) {
@@ -143,29 +141,15 @@ public record Order(String orderNo,
         return 0 < l && l < 5;
     }
 
-    private boolean checkPizzasDefined(Restaurant[] restaurants) {
-        try { // Make sure we don't crash if we somehow get null input
-            assert restaurants != null;
-        } catch (AssertionError e) {
-            return false;
-        }
-
-        List<MenuItem> allMenuItems = getAllMenuItems(restaurants);
-
-        HashSet<String> allMenuNames = allMenuItems.stream() // we want a HashSet for fast lookup
+    private boolean checkPizzasDefined(MenuItem[] menuItems) {
+        Set<String> allMenuNames = Arrays.stream(menuItems) // we want a HashSet for fast lookup
                 .map(MenuItem::name).collect(Collectors.toCollection(HashSet::new)); // to Set<String>
 
-        return allMenuNames.containsAll(new HashSet<>(List.of(this.orderItems))); // ensure every pizza name in the order is present in at least one restaurant's menu
+        // for containsAll only "this" needs to be a Set
+        return allMenuNames.containsAll(List.of(this.orderItems)); // ensure every pizza name in the order is present in at least one restaurant's menu
     }
 
     private boolean checkTotal(Restaurant restaurant) {
-        // difficult to remove code duplication and also retain readability due to the try-catch, I think the code is least confusing kept this way
-        try { // Make sure we don't crash if we somehow get a null value in restaurant
-            assert restaurant != null;
-        } catch (AssertionError e) {
-            return false;
-        }
-
         return calcTotal(restaurant) == this.priceTotalInPence;
     }
 

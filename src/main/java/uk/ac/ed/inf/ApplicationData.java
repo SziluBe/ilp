@@ -12,8 +12,6 @@ import java.util.Arrays;
 
 public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] noFlyZones, Area centralArea, LngLat deliveryOrigin) {
     // TODO: talk about how we use this instead of singletons in the report
-    // TODO: handle exceptions?
-    // TODO: ensure no nulls?
     public ApplicationData(URL baseAddress, String date, LngLat deliveryOrigin, ObjectMapper objectMapper) throws IOException {
         this(
                 objectMapper.readValue(new URL(baseAddress + "restaurants/"), Restaurant[].class),

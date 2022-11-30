@@ -59,10 +59,14 @@ public record LngLat(double lng, double lat) {
     /**
      * Calculates the position the drone would be at after moving 1 unit (of length 0.00015) in the compass direction passed in as a parameter.
      *
-     * @param dir The CmpDir object representing the compass direction in which the hypothetical move is happening.
+     * @param dir The CmpDir object representing the compass direction in which the hypothetical move is happening,
+     *            or null if the drone is doing a hover move.
      * @return Returns the LngLat object representing the point the drone would end up at after taking this move.
      */
     public LngLat nextPosition(Direction dir) {
+        if (dir == Constants.HOVER) {
+            return this;
+        }
         return add(dir.toLngLat());
     }
 

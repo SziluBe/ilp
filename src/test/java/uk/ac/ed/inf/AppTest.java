@@ -29,7 +29,7 @@ public class AppTest {
 
     @Test
     public void testDeliveryPlanner() throws IOException {
-        URL baseAddress = Constants.DEFAULT_BASE_ADDRESS;
+        URL baseAddress = new URL("https://ilp-rest.azurewebsites.net/");
         LocalDate startDate = LocalDate.of(2023, 1, 1);
         ArrayList<LocalDate> dates = new ArrayList<>();
         dates.add(startDate);
@@ -53,14 +53,14 @@ public class AppTest {
             Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
             OutPutGenerator outPutGenerator = new OutPutGenerator(deliveryPlanner, flightpathCalculator, objectMapper);
 
-            List<OutFlightPathEntry> flightPathEntries = outPutGenerator.getFlightPath(deliveredOrders);
+            List<OutFlightPathEntry> flightPathEntries = outPutGenerator.generateOutFlightPath(deliveredOrders);
 
             for (int j = 0; j < flightPathEntries.size() - 1; j++) {
                 assert (flightPathEntries.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
                         flightPathEntries.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
                        (flightPathEntries.get(j).distance() >= 0 - 0.000001 &&
                         flightPathEntries.get(j).distance() <= 0 + 0.000001) :
-                        "Move not correct length " + flightPathEntries.get(i).distance();
+                        "Move not correct length " + flightPathEntries.get(j).distance();
             }
 
             String deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders());
@@ -92,6 +92,9 @@ public class AppTest {
                 assert 11 == deliveryPlanner.getValidUndeliveredOrders().length : "Delivered orders not correct length " + dateString;
                 // assert that each OrderOutcome is present for the day
                 for (OrderOutcome outcome : OrderOutcome.values()) {
+                    if (outcome == OrderOutcome.Invalid) {
+                        continue;
+                    }
                     boolean found = false;
                     for (Order order : applicationData.orders()) {
                         if (deliveryPlanner.getOrderOutcome(order).equals(outcome)) {

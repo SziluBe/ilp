@@ -7,38 +7,38 @@ import uk.ac.ed.inf.Models.Input.Restaurant;
 import java.util.*;
 
 public class FlightPathCalculator {
-    private final Map<Restaurant, ArrayList<FlightPathEntry>> restaurantsPathsMap;
+    private final Map<Restaurant, List<FlightPathEntry>> restaurantsPathsMap = new java.util.HashMap<>();
+    private final Map<Restaurant, Boolean> restaurantsPathCalculatedMap = new java.util.HashMap<>();
     private final Area[] noFlyZones;
     private final Area centralArea;
     private final LngLat deliveryOrigin;
 
     public FlightPathCalculator(ApplicationData applicationData) {
-        this.restaurantsPathsMap = new java.util.HashMap<>();
         this.noFlyZones = applicationData.noFlyZones();
         this.centralArea = applicationData.centralArea();
         this.deliveryOrigin = applicationData.deliveryOrigin();
     }
 
     // TODO: make aStar a strategy
-    public ArrayList<FlightPathEntry> calculateFlightpath(Restaurant restaurant) {
-        if (restaurantsPathsMap.get(restaurant) == null) {
+    // TODO: document that this can return null
+    public List<FlightPathEntry> getFlightPath(Restaurant restaurant) {
+        Boolean isPathCalculated = restaurantsPathCalculatedMap.get(restaurant);
+        if (isPathCalculated == null || !isPathCalculated) { // this won't throw an error due to short-circuiting
             LngLat target = restaurant.lnglat();
-            ArrayList<FlightPathEntry> flightPath = aStar(deliveryOrigin, target);
-            // TODO: handle null results
+            List<FlightPathEntry> flightPath = aStar(deliveryOrigin, target);
 
             restaurantsPathsMap.put(restaurant, flightPath);
-            assert flightPath != null; // TODO
-            System.out.println("Calculated flightpath for " + restaurant.name() + " length: " + flightPath.size());
+            restaurantsPathCalculatedMap.put(restaurant, true);
+//            System.out.println("Calculated flightpath for " + restaurant.name() + " length: " + flightPath.size());
         }
 
         return restaurantsPathsMap.get(restaurant);
     }
 
-    // TODO: make sure stuff like HashMap is replaced with e.g. Map everywhere else too
-    private ArrayList<FlightPathEntry> reconstructPath(LngLat current,
+    private List<FlightPathEntry> reconstructPath(LngLat current,
                                                           Map<LngLat, LngLat> cameFrom,
                                                           Map<LngLat, Direction> stepDirs) {
-        ArrayList<FlightPathEntry> totalPath = new ArrayList<>();
+        List<FlightPathEntry> totalPath = new ArrayList<>();
         while (cameFrom.containsKey(current)) {
             LngLat previous = cameFrom.get(current);
             Direction stepDir = stepDirs.get(current);
@@ -53,7 +53,9 @@ public class FlightPathCalculator {
         return totalPath;
     }
 
-    private ArrayList<FlightPathEntry> aStar(LngLat start, LngLat goal) {
+    // TODO: credit wikipedia
+    // TODO: split into smaller methods; e.g. getNeighbours
+    private List<FlightPathEntry> aStar(LngLat start, LngLat goal) {
         // For node n, cameFrom.get(n) is the node immediately preceding it on the cheapest path from start
         // to n currently known.
         var cameFrom = new HashMap<LngLat, LngLat>();
@@ -98,9 +100,6 @@ public class FlightPathCalculator {
             }
 
             for (Direction direction : Direction.values()) {
-                if (direction == Direction.HOVER) {
-                    continue;
-                }
                 LngLat neighbor = current.nextPosition(direction);
                 iters++;
                 centralRevisitPenalty = 0.0;
@@ -116,16 +115,16 @@ public class FlightPathCalculator {
                     }
                 }
 
-                // tentative_gScore is the distance from start to the neighbor through current
-                var tentative_gScore = gScore.get(current)
+                // tentativeGScore is the distance from start to the neighbor through current
+                var tentativeGScore = gScore.get(current)
                         + current.distanceTo(neighbor)
                         + centralRevisitPenalty
                         + noFlyZonePenalty;
-                if (tentative_gScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
+                if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
                     // This path to neighbor is better than any previous one. Record it!
                     cameFrom.put(neighbor, current);
                     stepDirs.put(neighbor, direction);
-                    gScore.put(neighbor, tentative_gScore);
+                    gScore.put(neighbor, tentativeGScore);
                     if (!openSet.contains(neighbor)) {
                         openSet.add(neighbor);
                     }

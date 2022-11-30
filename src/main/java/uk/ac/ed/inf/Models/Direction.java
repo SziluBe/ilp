@@ -18,17 +18,19 @@ public enum Direction {
     S(12 * 22.5),
     SSE(13 * 22.5),
     SE(14 * 22.5),
-    ESE(15 * 22.5),
-    HOVER(Constants.HOVER_ANGLE);
+    ESE(15 * 22.5);
 
-    private final Double angle;
+    private final double angle;
 
-    Direction(Double angle) {
+    Direction(double angle) {
         this.angle = angle;
     }
 
-    public Double getAngle() {
+    public double getAngle() {
         return angle;
+    }
+    public Direction getOpposite() {
+        return Direction.values()[(this.ordinal() + 8) % 16];
     }
 
     /**
@@ -38,10 +40,6 @@ public enum Direction {
      * @return The LngLat object representing the change in coordinates after moving in the direction represented by this CmpDir instance.
      */
     public LngLat toLngLat() {
-        if (this == HOVER) {
-            return new LngLat(0, 0);
-        }
-
         double lng = Math.cos(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;
         double lat = Math.sin(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;
 

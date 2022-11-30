@@ -30,11 +30,11 @@ public class OutPutGenerator {
     }
 
     public String generateFlightPathOutPut(Order[] deliveredOrders) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(getFlightPath(deliveredOrders));
+        return objectMapper.writeValueAsString(generateOutFlightPath(deliveredOrders));
     }
 
     public String generateDeliveriesOutPut(Order[] orders) throws JsonProcessingException {
-        ArrayList<DeliveryEntry> deliveryEntries = new ArrayList<>();
+        List<DeliveryEntry> deliveryEntries = new ArrayList<>();
         for (Order order : orders) {
             // for invalid orders we don't need to worry about calculating the price,
             // for the rest it will be correct anyway
@@ -52,7 +52,7 @@ public class OutPutGenerator {
 
     public String generateFlightPathGeoJsonOutPut() {
         Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-        List<OutFlightPathEntry> outFlightPathEntries = getFlightPath(deliveredOrders);
+        List<OutFlightPathEntry> outFlightPathEntries = generateOutFlightPath(deliveredOrders);
 
         List<Point> flightPathPoints = outFlightPathEntries.stream()
                 .map(flightPathEntry -> Point.fromLngLat(flightPathEntry.fromLongitude(),
@@ -66,13 +66,13 @@ public class OutPutGenerator {
         return flightPathGeoJson.toJson();
     }
 
-    public ArrayList<OutFlightPathEntry> getFlightPath(Order[] deliveredOrders) {
-        ArrayList<OutFlightPathEntry> outFlightPathEntries = new ArrayList<>();
+    public List<OutFlightPathEntry> generateOutFlightPath(Order[] deliveredOrders) {
+        List<OutFlightPathEntry> outFlightPathEntries = new ArrayList<>();
         for (Order order : deliveredOrders) {
             Restaurant restaurant = deliveryPlanner.getRestaurantForOrder(order);
 
-            ArrayList<OutFlightPathEntry> outFlightPathToRestaurant = new ArrayList<>();
-            ArrayList<FlightPathEntry> flightPathToRestaurant = flightpathCalculator.calculateFlightpath(restaurant);
+            List<OutFlightPathEntry> outFlightPathToRestaurant = new ArrayList<>();
+            List<FlightPathEntry> flightPathToRestaurant = flightpathCalculator.getFlightPath(restaurant);
             for (FlightPathEntry step : flightPathToRestaurant) {
                 OutFlightPathEntry outFlightPathEntry = new OutFlightPathEntry(
                         order.orderNo(),
@@ -92,7 +92,7 @@ public class OutPutGenerator {
                     order.orderNo(),
                     outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLongitude(),
                     outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLatitude(),
-                    0,
+                    0, // TODO: report
                     outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLongitude(),
                     outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLatitude(),
                     System.nanoTime()
@@ -105,7 +105,7 @@ public class OutPutGenerator {
                         order.orderNo(),
                         outFlightPathEntry.toLongitude(),
                         outFlightPathEntry.toLatitude(),
-                        outFlightPathEntry.angle(),
+                        flightPathToRestaurant.get(i).direction().getOpposite().getAngle(),
                         outFlightPathEntry.fromLongitude(),
                         outFlightPathEntry.fromLatitude(),
                         System.nanoTime()

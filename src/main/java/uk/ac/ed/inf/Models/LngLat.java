@@ -15,6 +15,7 @@ public record LngLat(double lng, double lat) {
     }
 
     // TODO: should return true for boundary points (corners included)
+
     /**
      * Checks whether the point represented by the LngLat instance is within the given Area or not.
      *
@@ -73,7 +74,7 @@ public record LngLat(double lng, double lat) {
     }
 
     @NotNull
-    private LngLat add(LngLat otherLngLat) {
+    private LngLat add(@NotNull LngLat otherLngLat) {
         return new LngLat(this.lng() + otherLngLat.lng(), this.lat() + otherLngLat.lat());
     }
 }

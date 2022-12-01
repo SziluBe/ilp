@@ -3,10 +3,10 @@ package uk.ac.ed.inf.Stores;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.ed.inf.Constants;
-import uk.ac.ed.inf.Models.*;
 import uk.ac.ed.inf.Models.Input.Area;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.Input.Restaurant;
+import uk.ac.ed.inf.Models.LngLat;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -15,9 +15,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 
-public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] noFlyZones, Area centralArea, LngLat deliveryOrigin) {
+public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] noFlyZones, Area centralArea,
+                              LngLat deliveryOrigin, String date) {
     // TODO: talk about how we use this instead of singletons in the report
-    // TODO: validate input data, throw exceptions if invalid
     // TODO: mention that we use this for testing in the report
     public ApplicationData(@NotNull URL baseAddress, @NotNull String date, @NotNull LngLat deliveryOrigin, @NotNull ObjectMapper objectMapper) throws IOException {
         this(
@@ -25,7 +25,8 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
                 objectMapper.readValue(new URL(baseAddress + "orders/" + date), Order[].class), // orders
                 Arrays.stream((objectMapper.readValue(new URL(baseAddress + "noFlyZones"), Area[].class))).toArray(Area[]::new), // noFlyZones
                 new Area(Arrays.stream(objectMapper.readValue(new URL(baseAddress + "centralArea"), LngLat[].class)).toArray(LngLat[]::new)), // centralArea
-                deliveryOrigin // deliveryOrigin
+                deliveryOrigin, // deliveryOrigin
+                date // date
         );
     }
 
@@ -39,7 +40,8 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
                         Arrays.stream(objectMapper.readValue(ApplicationData.urlFromArgs(args, "centralArea"), LngLat[].class)) // centralArea
                                 .toArray(LngLat[]::new)
                 ),
-                Constants.AT // deliveryOrigin
+                Constants.AT, // deliveryOrigin
+                args[0] // date
         );
     }
 
@@ -53,7 +55,7 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
             // remove the http:// from the base address
             baseAddress = baseAddress.substring(7);
         }
-        if(!baseAddress.startsWith("https://")) {
+        if (!baseAddress.startsWith("https://")) {
             baseAddress = "https://" + baseAddress;
         }
         if (!path.endsWith("/")) {

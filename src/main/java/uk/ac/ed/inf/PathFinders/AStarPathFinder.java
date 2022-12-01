@@ -1,21 +1,16 @@
-package uk.ac.ed.inf.PathFinder;
+package uk.ac.ed.inf.PathFinders;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uk.ac.ed.inf.Stores.ApplicationData;
 import uk.ac.ed.inf.Constants;
-import uk.ac.ed.inf.Models.LngLat;
-import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.Models.Direction;
 import uk.ac.ed.inf.Models.Input.Area;
 import uk.ac.ed.inf.Models.Input.Restaurant;
+import uk.ac.ed.inf.Models.LngLat;
+import uk.ac.ed.inf.Models.Step;
+import uk.ac.ed.inf.Stores.ApplicationData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.PriorityQueue;
-import java.util.Comparator;
+import java.util.*;
 
 public class AStarPathFinder implements PathFinder {
     private final Map<Restaurant, List<Step>> restaurantsPathsMap = new java.util.HashMap<>();
@@ -42,7 +37,7 @@ public class AStarPathFinder implements PathFinder {
                 return null;
             }
 
-            List<Step> reversedSteps = new ArrayList<>();
+            var reversedSteps = new ArrayList<Step>();
             for (int i = flightPath.size() - 1; i >= 0; i--) {
                 reversedSteps.add(flightPath.get(i).getReverse());
             }
@@ -65,7 +60,7 @@ public class AStarPathFinder implements PathFinder {
     private List<Step> reconstructPath(LngLat current,
                                        Map<LngLat, LngLat> cameFrom,
                                        Map<LngLat, Direction> stepDirs) {
-        List<Step> totalPath = new ArrayList<>();
+        var totalPath = new ArrayList<Step>();
         while (cameFrom.containsKey(current)) {
             LngLat previous = cameFrom.get(current);
             Direction stepDir = stepDirs.get(current);

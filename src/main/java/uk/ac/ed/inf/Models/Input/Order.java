@@ -1,5 +1,6 @@
 package uk.ac.ed.inf.Models.Input;
 
+import org.jetbrains.annotations.NotNull;
 import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.OrderOutcome;
 
@@ -9,8 +10,8 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public record Order(String orderNo,
@@ -22,9 +23,10 @@ public record Order(String orderNo,
                     int priceTotalInPence,
                     String[] orderItems) {
 
+    @NotNull
     public OrderOutcome validateOrder(Restaurant restaurant, MenuItem[] menuItems) {
         if (restaurant == null || menuItems == null) {
-            System.out.println("Invalid validation call: restaurant or menuItems is null"); // TODO: make this an exception?
+            System.out.println("Invalid validation call: restaurant or menuItems is null");
             return OrderOutcome.Invalid;
         }
         if (!this.checkCardNumber()) {
@@ -69,7 +71,7 @@ public record Order(String orderNo,
         return Arrays.stream(this.orderItems())
                 .mapToInt(item -> Arrays.stream(restaurant.menuItems())
                         .filter(menuItem -> menuItem.name().equals(item)) // each restaurant should only have
-                                                                          // one menu item with a given name
+                        // one menu item with a given name
                         .mapToInt(MenuItem::priceInPence)
                         .sum())
                 .sum() + Constants.DELIVERY_CHARGE;
@@ -111,8 +113,8 @@ public record Order(String orderNo,
     }
 
     private boolean checkExpiryDate() throws DateTimeException {
-        DateTimeFormatter orderDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter expiryDateFormatter = DateTimeFormatter.ofPattern("MM/yy");
+        var orderDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        var expiryDateFormatter = DateTimeFormatter.ofPattern("MM/yy");
         TemporalAccessor orderDateAccessor = orderDateFormatter.parse(this.orderDate());
         try {
             // this will throw a DateTimeException if the expiry date is invalid
@@ -122,7 +124,7 @@ public record Order(String orderNo,
             }
             return expiryDate.get(ChronoField.MONTH_OF_YEAR) >= orderDateAccessor.get(ChronoField.MONTH_OF_YEAR) &&
                     expiryDate.get(ChronoField.YEAR) == orderDateAccessor.get(ChronoField.YEAR);
-        // if the expiry date is invalid, we return false
+            // if the expiry date is invalid, we return false
         } catch (DateTimeException e) {
             return false;
         }

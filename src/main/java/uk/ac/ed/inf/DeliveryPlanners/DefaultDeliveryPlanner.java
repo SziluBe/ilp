@@ -1,14 +1,15 @@
-package uk.ac.ed.inf.DeliveryPlanner;
+package uk.ac.ed.inf.DeliveryPlanners;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uk.ac.ed.inf.Stores.ApplicationData;
 import uk.ac.ed.inf.Constants;
-import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.Models.Input.MenuItem;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.Models.OrderOutcome;
 import uk.ac.ed.inf.Models.Input.Restaurant;
-import uk.ac.ed.inf.PathFinder.PathFinder;
+import uk.ac.ed.inf.Models.OrderOutcome;
+import uk.ac.ed.inf.Models.Step;
+import uk.ac.ed.inf.PathFinders.PathFinder;
+import uk.ac.ed.inf.Stores.ApplicationData;
 
 import java.util.*;
 
@@ -18,13 +19,13 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
     private final PathFinder flightpathFinder;
     private final ApplicationData appData;
     private final Map<Order, Restaurant> orderToRestaurantMap = new HashMap<>();
-    private boolean isRestaurantMapCalculated = false;
     private final Map<Order, Integer> orderToRequiredStepsMap = new HashMap<>();
-    private boolean isRequiredStepsMapCalculated = false;
     private final Map<Order, OrderOutcome> orderToOutcomeMap = new HashMap<>();
+    private boolean isRestaurantMapCalculated = false;
+    private boolean isRequiredStepsMapCalculated = false;
     private boolean isOutcomeMapCalculated = false;
 
-    public DefaultDeliveryPlanner(ApplicationData appData, PathFinder flightpathFinder) {
+    public DefaultDeliveryPlanner(@NotNull ApplicationData appData, @NotNull PathFinder flightpathFinder) {
         this.appData = appData;
         this.flightpathFinder = flightpathFinder;
     }
@@ -35,8 +36,8 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
             return;
         }
 
-        for (Order order : appData.orders()) {
-            for (Restaurant restaurant : appData.restaurants()) {
+        for (var order : appData.orders()) {
+            for (var restaurant : appData.restaurants()) {
                 if (Arrays.stream(restaurant.menuItems())
                         .anyMatch(menuItem -> menuItem.name().equals(order.orderItems()[0]))) {
                     orderToRestaurantMap.put(order, restaurant);
@@ -61,8 +62,8 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         }
         System.out.println("Calculating required steps for orders: " + appData.orders()[0].orderDate());
 
-        for (Order order : appData.orders()) {
-            Restaurant restaurant = getRestaurantForOrder(order);
+        for (var order : appData.orders()) {
+            var restaurant = getRestaurantForOrder(order);
             if (restaurant == null) { // TODO: comment
                 continue;
             }
@@ -90,27 +91,27 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
             return;
         }
 
-        MenuItem[] menuItems = Arrays.stream(appData.restaurants())
+        var menuItems = Arrays.stream(appData.restaurants())
                 .flatMap(restaurant -> Arrays.stream(restaurant.menuItems()))
                 .toArray(MenuItem[]::new);
 
         // validate orders
-        for (Order order : appData.orders()) {
-            Restaurant restaurant = getRestaurantForOrder(order);
+        for (var order : appData.orders()) {
+            var restaurant = getRestaurantForOrder(order);
             orderToOutcomeMap.put(
                     order,
                     order.validateOrder(restaurant, menuItems)
             );
         }
 
-        Order[] deliverableOrders = Arrays.stream(appData.orders())
+        var deliverableOrders = Arrays.stream(appData.orders())
                 .filter(order -> getRequiredStepsForOrder(order) != null) // TODO: mention IntelliJ warning in report
                 .sorted(Comparator.comparingInt(this::getRequiredStepsForOrder)) // cannot be null, we check in filter
                 .toArray(Order[]::new);
         // sort orders by steps
         // calculate final outcomes
         int nSteps = 0;
-        for (Order order : deliverableOrders) {
+        for (var order : deliverableOrders) {
             if (orderToOutcomeMap.get(order) == OrderOutcome.ValidButNotDelivered) {
                 Integer addedSteps = getRequiredStepsForOrder(order);
                 if (addedSteps != null) {
@@ -127,7 +128,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
 
     @Nullable
     public List<Step> getPathForOrder(Order order) {
-        Restaurant restaurant = getRestaurantForOrder(order);
+        var restaurant = getRestaurantForOrder(order);
         if (restaurant == null) {
             return null;
         }
@@ -142,6 +143,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         return orderToOutcomeMap.get(order);
     }
 
+    @NotNull
     public Order[] getDeliveredOrders() {
         // will never be null as empty streams still return an array on toArray
         return Arrays.stream(appData.orders())
@@ -149,6 +151,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
                 .toArray(Order[]::new);
     }
 
+    @NotNull
     public Order[] getValidUndeliveredOrders() {
         // will never be null as empty streams still return an array on toArray
         return Arrays.stream(appData.orders())
@@ -156,6 +159,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
                 .toArray(Order[]::new);
     }
 
+    @NotNull
     public Order[] getInvalidOrders() {
         // will never be null as empty streams still return an array on toArray
         return Arrays.stream(appData.orders())

@@ -11,14 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlanner;
-import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlannerFactory;
+import uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner;
 import uk.ac.ed.inf.Models.*;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.OutPutGenerator.OutPutGenerator;
-import uk.ac.ed.inf.OutPutGenerator.OutPutGeneratorFactory;
-import uk.ac.ed.inf.PathFinder.PathFinder;
-import uk.ac.ed.inf.PathFinder.PathFinderFactory;
+import uk.ac.ed.inf.OutPutGenerators.OutPutGenerator;
+import uk.ac.ed.inf.PathFinders.PathFinder;
 import uk.ac.ed.inf.Stores.ApplicationData;
 
 import static org.junit.Assert.*;
@@ -54,12 +51,12 @@ public class AppTest {
             ObjectMapper objectMapper = new ObjectMapper();
 
             ApplicationData applicationData = new ApplicationData(baseAddress, dateString, deliveryOrigin, objectMapper);
-            PathFinder flightpathFinder = PathFinderFactory.getPathFinder(applicationData);
+            PathFinder flightpathFinder = PathFinder.getPathFinder(applicationData);
 
-            DeliveryPlanner deliveryPlanner = DeliveryPlannerFactory.getDeliveryPlanner(applicationData, flightpathFinder);
+            DeliveryPlanner deliveryPlanner = DeliveryPlanner.getDeliveryPlanner(applicationData, flightpathFinder);
 
             Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-            OutPutGenerator outPutGenerator = OutPutGeneratorFactory.getOutPutGenerator(deliveryPlanner);
+            OutPutGenerator outPutGenerator = OutPutGenerator.getOutPutGenerator(deliveryPlanner);
 
             List<Step> steps = Arrays.stream(deliveredOrders).map(deliveryPlanner::getPathForOrder).flatMap(
                     orderSteps -> {
@@ -78,9 +75,9 @@ public class AppTest {
                         "Move not correct length " + steps.get(j).distance();
             }
 
-            String deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders());
-            String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders);
-            String flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
+            String deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders(), applicationData.date());
+            String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders, applicationData.date());
+            String flightPathGeoJson = outPutGenerator.generateFlightPathMapOutPut(deliveredOrders, applicationData.date());
 
             if (dateString.equals("2023-01-01")) {
                 System.out.println("Deliveries: " + deliveries);

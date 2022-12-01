@@ -1,15 +1,11 @@
 package uk.ac.ed.inf;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlanner;
-import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlannerFactory;
+import uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.Step;
-import uk.ac.ed.inf.OutPutGenerator.OutPutGenerator;
-import uk.ac.ed.inf.OutPutGenerator.OutPutGeneratorFactory;
-import uk.ac.ed.inf.PathFinder.PathFinder;
-import uk.ac.ed.inf.PathFinder.PathFinderFactory;
+import uk.ac.ed.inf.OutPutGenerators.OutPutGenerator;
+import uk.ac.ed.inf.PathFinders.PathFinder;
 import uk.ac.ed.inf.Stores.ApplicationData;
 
 import java.io.IOException;
@@ -20,40 +16,43 @@ import java.util.stream.Stream;
 
 /**
  * Hello world!
- *
  */
-public class App 
-{
-    public static void main( String[] args ) {
-        // TODO: generate output files
+public class App {
+    public static void main(String[] args) {
         // TODO: documentation
-        // TODO: optimise imports further (*)
-        // TODO: use var where appropriate
         // TODO: revise access modifiers
 
         if (args.length < 2) {
-            System.out.println("Please provide the following arguments: <baseAddress> <date>, optional arguments: <seed>");
+            System.err.println("Please provide the following arguments: <date> <baseAddress>, optional arguments: <seed>");
             return;
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        var objectMapper = new ObjectMapper();
 
         ApplicationData applicationData;
         try {
             applicationData = new ApplicationData(args, objectMapper);
         } catch (IOException e) {
-            throw new RuntimeException(e); // TODO: better exception handling (stderr)
+            System.err.println("""
+                    Failed to read input data from the server; please ensure arguments are correctly formatted:
+                    <date>: is in format YYYY-MM-DD\s
+                    <baseAddress>: is a valid URL\s
+                    , optional arguments: <seed>""");
+            e.printStackTrace();
+            return;
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e); // TODO: better exception handling (stderr)
+            System.err.println("Invalid base address");
+            e.printStackTrace();
+            return;
         }
-        PathFinder flightpathFinder = PathFinderFactory.getPathFinder(applicationData);
+        var flightpathFinder = PathFinder.getPathFinder(applicationData);
 
-        DeliveryPlanner deliveryPlanner = DeliveryPlannerFactory.getDeliveryPlanner(applicationData, flightpathFinder);
+        var deliveryPlanner = DeliveryPlanner.getDeliveryPlanner(applicationData, flightpathFinder);
 
         Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-        OutPutGenerator outPutGenerator = OutPutGeneratorFactory.getOutPutGenerator(deliveryPlanner);
+        var outPutGenerator = OutPutGenerator.getOutPutGenerator(deliveryPlanner);
 
-        // TODO: used only for printing
+        // used only for printing
         List<Step> steps = Arrays.stream(deliveredOrders)
                 .map(deliveryPlanner::getPathForOrder)
                 .flatMap(orderSteps -> {
@@ -64,24 +63,9 @@ public class App
                 })
                 .toList();
 
-        String deliveries;
-        try {
-            deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e); // TODO: better exception handling (stderr)
-        }
-        String flightPathJson;
-        try {
-            flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e); // TODO: better exception handling (stderr)
-        }
-        String flightPathGeoJson;
-        try {
-            flightPathGeoJson = outPutGenerator.generateFlightPathGeoJsonOutPut();
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e); // TODO: better exception handling (stderr)
-        }
+        String deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders(), applicationData.date());
+        String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders, applicationData.date());
+        String flightPathGeoJson = outPutGenerator.generateFlightPathMapOutPut(deliveredOrders, applicationData.date());
 
         System.out.println("Deliveries Json: " + deliveries);
         System.out.println("Flightpath Json: " + flightPathJson);

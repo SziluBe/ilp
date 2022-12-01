@@ -9,6 +9,12 @@ public record Step(LngLat from, Direction direction, LngLat to) {
 
     @NotNull
     public Step getReverse() {
-        return new Step(to, direction.getOpposite(), from);
+        Direction newDirection;
+        if (direction == null) {
+            newDirection = null;
+        } else {
+            newDirection = direction.getOpposite();
+        }
+        return new Step(to, newDirection, from);
     }
 }

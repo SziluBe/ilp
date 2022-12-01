@@ -1,41 +1,43 @@
-package uk.ac.ed.inf.OutPutGenerator;
+package uk.ac.ed.inf.OutPutGenerators;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlanner;
-import uk.ac.ed.inf.Models.Direction;
-import uk.ac.ed.inf.Models.OrderOutcome;
-import uk.ac.ed.inf.Models.Step;
+import org.jetbrains.annotations.NotNull;
+import uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner;
 import uk.ac.ed.inf.Models.Input.Order;
+import uk.ac.ed.inf.Models.OrderOutcome;
 import uk.ac.ed.inf.Models.Output.DeliveryEntry;
 import uk.ac.ed.inf.Models.Output.FlightPathEntry;
+import uk.ac.ed.inf.Models.Step;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DefaultOutPutGenerator implements OutPutGenerator {
+public class JsonOutPutGenerator implements OutPutGenerator {
     private final DeliveryPlanner deliveryPlanner;
     private final ObjectMapper objectMapper;
 
-    public DefaultOutPutGenerator(DeliveryPlanner deliveryPlanner,
-                           ObjectMapper objectMapper) {
+    public JsonOutPutGenerator(DeliveryPlanner deliveryPlanner,
+                               ObjectMapper objectMapper) {
         this.deliveryPlanner = deliveryPlanner;
         this.objectMapper = objectMapper;
     }
 
-    public String generateDeliveriesOutPut(Order[] orders) throws JsonProcessingException {
-        List<DeliveryEntry> deliveryEntries = new ArrayList<>();
-        for (Order order : orders) {
+    @NotNull
+    public String generateDeliveriesOutPut(@NotNull Order[] orders, @NotNull String date) {
+        var deliveryEntries = new ArrayList<DeliveryEntry>();
+        for (var order : orders) {
             // for invalid orders we don't need to worry about calculating the price,
             // for the rest it will be correct anyway
-            OrderOutcome orderOutcome = deliveryPlanner.getOrderOutcome(order);
+            var orderOutcome = deliveryPlanner.getOrderOutcome(order);
             if (orderOutcome == null) {
                 orderOutcome = OrderOutcome.Invalid; // not in appData, null restaurant, etc.
             }
@@ -48,11 +50,24 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
             );
         }
 
-        return objectMapper.writeValueAsString(deliveryEntries);
+        String deliveriesJsonString;
+
+        // write to file
+        String filename = "deliveries-" + date + ".json";
+        try (FileWriter file = new FileWriter(filename)) {
+            deliveriesJsonString = objectMapper.writeValueAsString(deliveryEntries);
+            file.write(deliveriesJsonString);
+            file.flush();
+        } catch (IOException e) {
+            System.err.println("An error occurred when generating GeoJSON output: " + filename);
+            e.printStackTrace();
+        }
+
+        return filename;
     }
 
-    public String generateFlightPathGeoJsonOutPut() {
-        Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
+    @NotNull
+    public String generateFlightPathMapOutPut(@NotNull Order[] deliveredOrders, @NotNull String date) {
         List<Step> steps = Arrays.stream(deliveredOrders)
                 .map(deliveryPlanner::getPathForOrder)
                 .flatMap(orderSteps -> {
@@ -66,7 +81,7 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
         // generate the points for the geojson from the steps
         List<Point> flightPathPoints = steps.stream()
                 .map(step -> Point.fromLngLat(step.to().lng(),
-                                              step.to().lat()))
+                        step.to().lat()))
                 .collect(Collectors.toList());
 
         if (flightPathPoints.size() != 0) { // if there are no steps, get(0) will produce an error
@@ -79,19 +94,33 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
                 new Feature[]{Feature.fromGeometry(LineString.fromLngLats(flightPathPoints))}
         );
 
-        return flightPathGeoJson.toJson();
+        String flightPathGeoJsonString = flightPathGeoJson.toJson();
+
+        // write to file
+        String filename = "drone-" + date + ".geojson";
+        try {
+            FileWriter fileWriter = new FileWriter(filename);
+            fileWriter.write(flightPathGeoJsonString);
+            fileWriter.close();
+        } catch (IOException e) {
+            System.err.println("An error occurred when generating GeoJSON output: " + filename);
+            e.printStackTrace();
+        }
+
+        return filename;
     }
 
-    public String generateFlightPathOutPut(Order[] deliveredOrders) throws JsonProcessingException {
-        List<FlightPathEntry> outFlightPathEntries = new ArrayList<>();
+    @NotNull
+    public String generateFlightPathOutPut(@NotNull Order[] deliveredOrders, @NotNull String date) {
+        var outFlightPathEntries = new ArrayList<FlightPathEntry>();
         for (Order order : deliveredOrders) {
             List<Step> stepsForOrder = deliveryPlanner.getPathForOrder(order);
             if (stepsForOrder == null) {
                 continue;
             }
-            for (Step step : stepsForOrder) {
-                Direction dir = step.direction();
-                FlightPathEntry flightPathEntry = new FlightPathEntry(
+            for (var step : stepsForOrder) {
+                var dir = step.direction();
+                var flightPathEntry = new FlightPathEntry(
                         order.orderNo(),
                         step.from().lng(),
                         step.from().lat(),
@@ -103,7 +132,22 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
                 outFlightPathEntries.add(flightPathEntry);
             }
         }
-        System.out.println("outFlightPathEntries = " + outFlightPathEntries.size());
-        return objectMapper.writeValueAsString(outFlightPathEntries);
+        System.out.println("outFlightPathEntries: " + outFlightPathEntries.size());
+
+        String flightPathJsonString;
+
+        // write to file
+        String filename = "flightpath-" + date + ".json";
+        try {
+            flightPathJsonString = objectMapper.writeValueAsString(outFlightPathEntries);
+            FileWriter fileWriter = new FileWriter(filename);
+            fileWriter.write(flightPathJsonString);
+            fileWriter.close();
+        } catch (IOException e) {
+            System.err.println("An error occurred when generating JSON output: " + filename);
+            e.printStackTrace();
+        }
+
+        return filename;
     }
 }

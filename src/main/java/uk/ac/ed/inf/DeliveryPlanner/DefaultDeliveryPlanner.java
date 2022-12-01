@@ -1,5 +1,6 @@
 package uk.ac.ed.inf.DeliveryPlanner;
 
+import org.jetbrains.annotations.Nullable;
 import uk.ac.ed.inf.Stores.ApplicationData;
 import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.Step;
@@ -46,6 +47,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         isRestaurantMapCalculated = true;
     }
 
+    @Nullable
     private Restaurant getRestaurantForOrder(Order order) {
         // ensure all orders have a restaurant assigned
         assignRestaurantsToOrders();
@@ -75,6 +77,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         isRequiredStepsMapCalculated = true;
     }
 
+    @Nullable
     private Integer getRequiredStepsForOrder(Order order) {
         // ensure all orders have a restaurant assigned
         assignRequiredStepsToOrders();
@@ -101,8 +104,8 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         }
 
         Order[] deliverableOrders = Arrays.stream(appData.orders())
-                .filter(order -> getRequiredStepsForOrder(order) != null)        // TODO: comment
-                .sorted(Comparator.comparingInt(this::getRequiredStepsForOrder))
+                .filter(order -> getRequiredStepsForOrder(order) != null) // TODO: mention IntelliJ warning in report
+                .sorted(Comparator.comparingInt(this::getRequiredStepsForOrder)) // cannot be null, we check in filter
                 .toArray(Order[]::new);
         // sort orders by steps
         // calculate final outcomes
@@ -122,6 +125,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         isOutcomeMapCalculated = true;
     }
 
+    @Nullable
     public List<Step> getPathForOrder(Order order) {
         Restaurant restaurant = getRestaurantForOrder(order);
         if (restaurant == null) {
@@ -131,6 +135,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         return flightpathFinder.getFlightPath(restaurant);
     }
 
+    @Nullable
     public OrderOutcome getOrderOutcome(Order order) {
         // ensure orders have their outcomes assigned
         assignOutcomesToOrders();

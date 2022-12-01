@@ -8,6 +8,7 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlanner;
 import uk.ac.ed.inf.Models.Direction;
+import uk.ac.ed.inf.Models.OrderOutcome;
 import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.Output.DeliveryEntry;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultOutPutGenerator implements OutPutGenerator {
     private final DeliveryPlanner deliveryPlanner;
@@ -28,19 +30,19 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
         this.objectMapper = objectMapper;
     }
 
-    public String generateFlightPathOutPut(Order[] deliveredOrders) throws JsonProcessingException {
-        return generateOutFlightPath(deliveredOrders);
-    }
-
     public String generateDeliveriesOutPut(Order[] orders) throws JsonProcessingException {
         List<DeliveryEntry> deliveryEntries = new ArrayList<>();
         for (Order order : orders) {
             // for invalid orders we don't need to worry about calculating the price,
             // for the rest it will be correct anyway
+            OrderOutcome orderOutcome = deliveryPlanner.getOrderOutcome(order);
+            if (orderOutcome == null) {
+                orderOutcome = OrderOutcome.Invalid; // not in appData, null restaurant, etc.
+            }
             deliveryEntries.add(
                     new DeliveryEntry(
                             order.orderNo(),
-                            deliveryPlanner.getOrderOutcome(order),
+                            orderOutcome,
                             order.priceTotalInPence()
                     )
             );
@@ -53,7 +55,12 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
         Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
         List<Step> steps = Arrays.stream(deliveredOrders)
                 .map(deliveryPlanner::getPathForOrder)
-                .flatMap(List::stream)
+                .flatMap(orderSteps -> {
+                    if (orderSteps == null) {
+                        return Stream.of();
+                    }
+                    return orderSteps.stream();
+                })
                 .toList();
 
         // generate the points for the geojson from the steps
@@ -61,10 +68,12 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
                 .map(step -> Point.fromLngLat(step.to().lng(),
                                               step.to().lat()))
                 .collect(Collectors.toList());
-//
-//        // add the origin to the start of the list
-//        flightPathPoints.add(0, Point.fromLngLat(steps.get(0).from().lng(),
-//                                                 steps.get(0).from().lat()));
+
+        if (flightPathPoints.size() != 0) { // if there are no steps, get(0) will produce an error
+            // add the origin to the start of the list
+            flightPathPoints.add(0, Point.fromLngLat(steps.get(0).from().lng(),
+                    steps.get(0).from().lat()));
+        }
 
         FeatureCollection flightPathGeoJson = FeatureCollection.fromFeatures(
                 new Feature[]{Feature.fromGeometry(LineString.fromLngLats(flightPathPoints))}
@@ -73,10 +82,13 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
         return flightPathGeoJson.toJson();
     }
 
-    public String generateOutFlightPath(Order[] deliveredOrders) throws JsonProcessingException {
+    public String generateFlightPathOutPut(Order[] deliveredOrders) throws JsonProcessingException {
         List<FlightPathEntry> outFlightPathEntries = new ArrayList<>();
         for (Order order : deliveredOrders) {
             List<Step> stepsForOrder = deliveryPlanner.getPathForOrder(order);
+            if (stepsForOrder == null) {
+                continue;
+            }
             for (Step step : stepsForOrder) {
                 Direction dir = step.direction();
                 FlightPathEntry flightPathEntry = new FlightPathEntry(
@@ -90,43 +102,6 @@ public class DefaultOutPutGenerator implements OutPutGenerator {
                 );
                 outFlightPathEntries.add(flightPathEntry);
             }
-
-//            outFlightPathEntries.addAll(flightPathForOrder);
-//
-//            outFlightPathEntries.add(new FlightPathEntry(
-//                    order.orderNo(),
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLongitude(),
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLatitude(),
-//                    0, // TODO: report
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLongitude(),
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLatitude(),
-//                    System.nanoTime()
-//            )); // hover on pickup
-//
-//            // add reverse of pathToRestaurant
-//            for (int i = flightPathForOrder.size() - 1; i >= 0; i--) {
-//                FlightPathEntry flightPathEntry = flightPathForOrder.get(i);
-//                FlightPathEntry backwardsEntry = new FlightPathEntry(
-//                        order.orderNo(),
-//                        flightPathEntry.toLongitude(),
-//                        flightPathEntry.toLatitude(),
-//                        stepsForOrder.get(i).direction().getOpposite().getAngle(),
-//                        flightPathEntry.fromLongitude(),
-//                        flightPathEntry.fromLatitude(),
-//                        System.nanoTime()
-//                );
-//                outFlightPathEntries.add(backwardsEntry);
-//            }
-//
-//            outFlightPathEntries.add(new FlightPathEntry(
-//                    order.orderNo(),
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLongitude(),
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLatitude(),
-//                    0,
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLongitude(),
-//                    outFlightPathEntries.get(outFlightPathEntries.size() - 1).toLatitude(),
-//                    System.nanoTime()
-//            )); // hover on drop-off
         }
         System.out.println("outFlightPathEntries = " + outFlightPathEntries.size());
         return objectMapper.writeValueAsString(outFlightPathEntries);

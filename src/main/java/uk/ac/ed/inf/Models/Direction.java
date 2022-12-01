@@ -1,5 +1,6 @@
 package uk.ac.ed.inf.Models;
 
+import org.jetbrains.annotations.NotNull;
 import uk.ac.ed.inf.Constants;
 
 public enum Direction {
@@ -29,6 +30,8 @@ public enum Direction {
     public double getAngle() {
         return angle;
     }
+
+    @NotNull
     public Direction getOpposite() {
         return Direction.values()[(this.ordinal() + 8) % 16];
     }
@@ -39,6 +42,7 @@ public enum Direction {
      *
      * @return The LngLat object representing the change in coordinates after moving in the direction represented by this CmpDir instance.
      */
+    @NotNull
     public LngLat toLngLat() {
         double lng = Math.cos(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;
         double lat = Math.sin(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;

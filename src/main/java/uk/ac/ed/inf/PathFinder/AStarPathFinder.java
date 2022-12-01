@@ -1,12 +1,21 @@
 package uk.ac.ed.inf.PathFinder;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import uk.ac.ed.inf.Stores.ApplicationData;
 import uk.ac.ed.inf.Constants;
-import uk.ac.ed.inf.Models.*;
+import uk.ac.ed.inf.Models.LngLat;
+import uk.ac.ed.inf.Models.Step;
+import uk.ac.ed.inf.Models.Direction;
 import uk.ac.ed.inf.Models.Input.Area;
 import uk.ac.ed.inf.Models.Input.Restaurant;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.PriorityQueue;
+import java.util.Comparator;
 
 public class AStarPathFinder implements PathFinder {
     private final Map<Restaurant, List<Step>> restaurantsPathsMap = new java.util.HashMap<>();
@@ -23,6 +32,7 @@ public class AStarPathFinder implements PathFinder {
     }
 
     // TODO: document that this can return null
+    @Nullable
     public List<Step> getFlightPath(Restaurant restaurant) {
         Boolean isPathCalculated = restaurantsPathCalculatedMap.get(restaurant);
         if (isPathCalculated == null || !isPathCalculated) { // this won't throw an error due to short-circuiting
@@ -72,7 +82,7 @@ public class AStarPathFinder implements PathFinder {
 
     //  based on pseudocode from https://en.wikipedia.org/wiki/A*_search_algorithm
     // TODO: split into smaller methods; e.g. getNeighbours
-    private List<Step> aStar(LngLat start, LngLat goal) {
+    private List<Step> aStar(@NotNull LngLat start, @NotNull LngLat goal) {
         // For node n, cameFrom.get(n) is the node immediately preceding it on the cheapest path from start
         // to n currently known.
         var cameFrom = new HashMap<LngLat, LngLat>();

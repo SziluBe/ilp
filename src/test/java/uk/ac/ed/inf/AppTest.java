@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlanner;
 import uk.ac.ed.inf.DeliveryPlanner.DeliveryPlannerFactory;
@@ -60,7 +61,14 @@ public class AppTest {
             Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
             OutPutGenerator outPutGenerator = OutPutGeneratorFactory.getOutPutGenerator(deliveryPlanner);
 
-            List<Step> steps = Arrays.stream(deliveredOrders).map(deliveryPlanner::getPathForOrder).flatMap(List::stream).toList();
+            List<Step> steps = Arrays.stream(deliveredOrders).map(deliveryPlanner::getPathForOrder).flatMap(
+                    orderSteps -> {
+                        if (orderSteps == null) {
+                            return Stream.empty();
+                        } else {
+                            return orderSteps.stream();
+                        }
+                    }).toList();
 
             for (int j = 0; j < steps.size() - 1; j++) {
                 assert (steps.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
@@ -104,7 +112,11 @@ public class AppTest {
                     }
                     boolean found = false;
                     for (Order order : applicationData.orders()) {
-                        if (deliveryPlanner.getOrderOutcome(order).equals(outcome)) {
+                        OrderOutcome orderOutcome = deliveryPlanner.getOrderOutcome(order);
+                        if (orderOutcome == null) {
+                            continue;
+                        }
+                        if (orderOutcome.equals(outcome)) {
                             found = true;
                             break;
                         }

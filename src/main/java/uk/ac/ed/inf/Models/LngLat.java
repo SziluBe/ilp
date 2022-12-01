@@ -2,6 +2,7 @@ package uk.ac.ed.inf.Models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.jetbrains.annotations.NotNull;
 import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.Input.Area;
 
@@ -63,6 +64,7 @@ public record LngLat(double lng, double lat) {
      *            or null if the drone is doing a hover move.
      * @return Returns the LngLat object representing the point the drone would end up at after taking this move.
      */
+    @NotNull
     public LngLat nextPosition(Direction dir) {
         if (dir == Constants.HOVER) {
             return this;
@@ -70,6 +72,7 @@ public record LngLat(double lng, double lat) {
         return add(dir.toLngLat());
     }
 
+    @NotNull
     private LngLat add(LngLat otherLngLat) {
         return new LngLat(this.lng() + otherLngLat.lng(), this.lat() + otherLngLat.lat());
     }

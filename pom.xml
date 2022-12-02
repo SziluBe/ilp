@@ -44,6 +44,12 @@
       <artifactId>mapbox-sdk-geojson</artifactId>
       <version>5.8.0</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>16.0.1</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner;
 import uk.ac.ed.inf.Models.*;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.OutPutGenerators.OutPutGenerator;
+import uk.ac.ed.inf.OutputGenerators.OutputGenerator;
 import uk.ac.ed.inf.PathFinders.PathFinder;
 import uk.ac.ed.inf.Stores.ApplicationData;
 
@@ -56,7 +56,7 @@ public class AppTest {
             DeliveryPlanner deliveryPlanner = DeliveryPlanner.getDeliveryPlanner(applicationData, flightpathFinder);
 
             Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
-            OutPutGenerator outPutGenerator = OutPutGenerator.getOutPutGenerator(deliveryPlanner);
+            OutputGenerator outputGenerator = OutputGenerator.getOutputGenerator(deliveryPlanner);
 
             List<Step> steps = Arrays.stream(deliveredOrders).map(deliveryPlanner::getPathForOrder).flatMap(
                     orderSteps -> {
@@ -75,9 +75,9 @@ public class AppTest {
                         "Move not correct length " + steps.get(j).distance();
             }
 
-            String deliveries = outPutGenerator.generateDeliveriesOutPut(applicationData.orders(), applicationData.date());
-            String flightPathJson = outPutGenerator.generateFlightPathOutPut(deliveredOrders, applicationData.date());
-            String flightPathGeoJson = outPutGenerator.generateFlightPathMapOutPut(deliveredOrders, applicationData.date());
+            String deliveries = outputGenerator.generateDeliveriesOutput(applicationData.orders(), applicationData.date());
+            String flightPathJson = outputGenerator.generateFlightPathOutput(deliveredOrders, applicationData.date());
+            String flightPathGeoJson = outputGenerator.generateFlightPathMapOutput(deliveredOrders, applicationData.date());
 
             if (dateString.equals("2023-01-01")) {
                 System.out.println("Deliveries: " + deliveries);

@@ -1,4 +1,4 @@
-package uk.ac.ed.inf.OutPutGenerators;
+package uk.ac.ed.inf.OutputGenerators;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapbox.geojson.Feature;
@@ -21,18 +21,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class JsonOutPutGenerator implements OutPutGenerator {
+public class JsonOutputGenerator implements OutputGenerator {
     private final DeliveryPlanner deliveryPlanner;
     private final ObjectMapper objectMapper;
 
-    public JsonOutPutGenerator(DeliveryPlanner deliveryPlanner,
+    public JsonOutputGenerator(DeliveryPlanner deliveryPlanner,
                                ObjectMapper objectMapper) {
         this.deliveryPlanner = deliveryPlanner;
         this.objectMapper = objectMapper;
     }
 
     @NotNull
-    public String generateDeliveriesOutPut(@NotNull Order[] orders, @NotNull String date) {
+    public String generateDeliveriesOutput(@NotNull Order[] orders, @NotNull String date) {
         var deliveryEntries = new ArrayList<DeliveryEntry>();
         for (var order : orders) {
             // for invalid orders we don't need to worry about calculating the price,
@@ -67,7 +67,7 @@ public class JsonOutPutGenerator implements OutPutGenerator {
     }
 
     @NotNull
-    public String generateFlightPathMapOutPut(@NotNull Order[] deliveredOrders, @NotNull String date) {
+    public String generateFlightPathMapOutput(@NotNull Order[] deliveredOrders, @NotNull String date) {
         List<Step> steps = Arrays.stream(deliveredOrders)
                 .map(deliveryPlanner::getPathForOrder)
                 .flatMap(orderSteps -> {
@@ -111,7 +111,7 @@ public class JsonOutPutGenerator implements OutPutGenerator {
     }
 
     @NotNull
-    public String generateFlightPathOutPut(@NotNull Order[] deliveredOrders, @NotNull String date) {
+    public String generateFlightPathOutput(@NotNull Order[] deliveredOrders, @NotNull String date) {
         var outFlightPathEntries = new ArrayList<FlightPathEntry>();
         for (Order order : deliveredOrders) {
             List<Step> stepsForOrder = deliveryPlanner.getPathForOrder(order);

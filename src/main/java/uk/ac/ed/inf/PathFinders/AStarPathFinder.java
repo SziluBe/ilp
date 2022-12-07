@@ -9,8 +9,16 @@ import uk.ac.ed.inf.Models.LngLat;
 import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.Stores.ApplicationData;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Map;
+import java.util.HashMap;
 
+/**
+ * Represents a pathfinder that uses the A* algorithm.
+ */
 public class AStarPathFinder implements PathFinder {
     private final Map<Restaurant, List<Step>> restaurantsPathsMap = new java.util.HashMap<>();
     private final Map<Restaurant, Boolean> restaurantsPathCalculatedMap = new java.util.HashMap<>();
@@ -19,6 +27,12 @@ public class AStarPathFinder implements PathFinder {
     private final LngLat deliveryOrigin;
 
     // TODO: mention strategies in report
+
+    /**
+     * Default constructor.
+     *
+     * @param applicationData The application data.
+     */
     public AStarPathFinder(ApplicationData applicationData) {
         this.noFlyZones = applicationData.noFlyZones();
         this.centralArea = applicationData.centralArea();
@@ -26,6 +40,12 @@ public class AStarPathFinder implements PathFinder {
     }
 
     // TODO: document that this can return null
+
+    /**
+     * Gets the flight path to the given restaurant using the A* algorithm.
+     *
+     * @inheritDoc
+     */
     @Nullable
     public List<Step> getFlightPath(Restaurant restaurant) {
         Boolean isPathCalculated = restaurantsPathCalculatedMap.get(restaurant);

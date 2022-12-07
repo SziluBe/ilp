@@ -21,16 +21,31 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Represents an output generator that outputs JSON and GeoJSON files.
+ */
 public class JsonOutputGenerator implements OutputGenerator {
     private final DeliveryPlanner deliveryPlanner;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Default constructor.
+     *
+     * @param deliveryPlanner The delivery planner.
+     * @param objectMapper The object mapper.
+     */
     public JsonOutputGenerator(DeliveryPlanner deliveryPlanner,
                                ObjectMapper objectMapper) {
         this.deliveryPlanner = deliveryPlanner;
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * @inheritDoc
+     * Each entry in the output JSON array is a JSON object serialised from a {@link DeliveryEntry} object.
+     *
+     * The output is written to a file called "deliveries-YYYY-MM-DD.json".
+     */
     @NotNull
     public String generateDeliveriesOutput(@NotNull Order[] orders, @NotNull String date) {
         var deliveryEntries = new ArrayList<DeliveryEntry>();
@@ -66,6 +81,12 @@ public class JsonOutputGenerator implements OutputGenerator {
         return filename;
     }
 
+    /**
+     * @inheritDoc
+     * Generates the map output in GeoJSON format.
+     *
+     * The output is written to a file called "drone-YYYY-MM-DD.json".
+     */
     @NotNull
     public String generateFlightPathMapOutput(@NotNull Order[] deliveredOrders, @NotNull String date) {
         List<Step> steps = Arrays.stream(deliveredOrders)
@@ -110,6 +131,12 @@ public class JsonOutputGenerator implements OutputGenerator {
         return filename;
     }
 
+    /**
+     * @inheritDoc
+     * Each entry in the output JSON array is a JSON object serialised from a {@link FlightPathEntry} object.
+     *
+     * The output is written to a file called "flightpath-YYYY-MM-DD.json".
+     */
     @NotNull
     public String generateFlightPathOutput(@NotNull Order[] deliveredOrders, @NotNull String date) {
         var outFlightPathEntries = new ArrayList<FlightPathEntry>();

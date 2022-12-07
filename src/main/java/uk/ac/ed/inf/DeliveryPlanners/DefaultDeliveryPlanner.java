@@ -10,14 +10,19 @@ import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.PathFinders.PathFinder;
 import uk.ac.ed.inf.Stores.ApplicationData;
 
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Comparator;
 
+/**
+ * Represents an instance of the default delivery planner.
+ * The default delivery planner uses a pathfinder to find the shortest path for each order, and
+ * then plans the flights to deliver as many orders as possible within the limit of the drone's
+ * battery.
+ */
 public class DefaultDeliveryPlanner implements DeliveryPlanner {
-    /**
-     * The default delivery planner uses a pathfinder to find the shortest path for each order, and
-     * then plans the flights to deliver as many orders as possible within the limit of the drone's
-     * battery.
-     */
 
     // TODO: mention in docs that all the "get..." methods can return nulls or collections with nulls present
     // TODO: javadocs for classes, not just methods
@@ -30,6 +35,12 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
     private boolean isRequiredStepsMapCalculated = false;
     private boolean isOutcomeMapCalculated = false;
 
+    /**
+     * Creates a new instance of the default delivery planner.
+     *
+     * @param appData The application data.
+     * @param flightpathFinder The pathfinder.
+     */
     public DefaultDeliveryPlanner(@NotNull ApplicationData appData, @NotNull PathFinder flightpathFinder) {
         this.appData = appData;
         this.flightpathFinder = flightpathFinder;
@@ -131,6 +142,9 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         isOutcomeMapCalculated = true;
     }
 
+    /**
+     * @inheritDoc
+     */
     @Nullable
     public List<Step> getPathForOrder(Order order) {
         var restaurant = getRestaurantForOrder(order);
@@ -141,6 +155,9 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         return flightpathFinder.getFlightPath(restaurant);
     }
 
+    /**
+     * @inheritDoc
+     */
     @Nullable
     public OrderOutcome getOrderOutcome(Order order) {
         // ensure orders have their outcomes assigned
@@ -148,6 +165,9 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         return orderToOutcomeMap.get(order);
     }
 
+    /**
+     * @inheritDoc
+     */
     @NotNull
     public Order[] getDeliveredOrders() {
         // will never be null as empty streams still return an array on toArray
@@ -156,6 +176,9 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
                 .toArray(Order[]::new);
     }
 
+    /**
+     * @inheritDoc
+     */
     @NotNull
     public Order[] getValidUndeliveredOrders() {
         // will never be null as empty streams still return an array on toArray
@@ -164,6 +187,9 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
                 .toArray(Order[]::new);
     }
 
+    /**
+     * @inheritDoc
+     */
     @NotNull
     public Order[] getInvalidOrders() {
         // will never be null as empty streams still return an array on toArray

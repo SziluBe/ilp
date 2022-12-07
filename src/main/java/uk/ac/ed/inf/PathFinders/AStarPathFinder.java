@@ -95,7 +95,6 @@ public class AStarPathFinder implements PathFinder {
     }
 
     //  based on pseudocode from https://en.wikipedia.org/wiki/A*_search_algorithm
-    // TODO: split into smaller methods; e.g. getNeighbours
     private List<Step> aStar(@NotNull LngLat start, @NotNull LngLat goal) {
         // For node n, cameFrom.get(n) is the node immediately preceding it on the cheapest path from start
         // to n currently known.

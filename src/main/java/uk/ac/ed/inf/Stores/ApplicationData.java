@@ -30,6 +30,9 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
      * @param String date The date related to the data.
      */
 
+    /**
+     * The location of Appleton Tower.
+     */
     public static final LngLat AT = new LngLat(-3.186874, 55.944494);
 
     // TODO: talk about how we use this instead of singletons in the report

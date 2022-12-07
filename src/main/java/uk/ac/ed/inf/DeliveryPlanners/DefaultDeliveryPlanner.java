@@ -116,7 +116,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
             var restaurant = getRestaurantForOrder(order);
             orderToOutcomeMap.put(
                     order,
-                    order.validateOrder(restaurant, menuItems)
+                    order.validateOrder(restaurant, menuItems, appData.date())
             );
         }
 

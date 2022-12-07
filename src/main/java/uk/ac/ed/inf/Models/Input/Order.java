@@ -51,9 +51,13 @@ public record Order(String orderNo,
      * @return The tentative outcome of the order, before delivery.
      */
     @NotNull
-    public OrderOutcome validateOrder(Restaurant restaurant, MenuItem[] menuItems) {
+    public OrderOutcome validateOrder(Restaurant restaurant, MenuItem[] menuItems, String inputDate) {
         if (restaurant == null || menuItems == null) {
             System.out.println("Invalid validation call: restaurant or menuItems is null");
+            return OrderOutcome.Invalid;
+        }
+        if (!this.checkOrderDate(inputDate)) {
+            System.out.println("Invalid order date: " + this.orderDate());
             return OrderOutcome.Invalid;
         }
         if (!this.checkCardNumber()) {
@@ -139,13 +143,33 @@ public record Order(String orderNo,
         return (sum % 10 == 0);
     }
 
-    private boolean checkExpiryDate() throws DateTimeException {
+    private boolean checkOrderDate(String inputDate) {
+        // order needs to be on the day we are asking for
+        if (!this.orderDate().equals(inputDate)) {
+            return false;
+        }
+        // order needs to be in the right format
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            // this will throw an exception if the date is not in the right format
+            formatter.parse(this.orderDate());
+            // otherwise, the date is valid
+            return true;
+        } catch (DateTimeException e) {
+            return false;
+        }
+    }
+
+    private boolean checkExpiryDate() {
         var orderDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         var expiryDateFormatter = DateTimeFormatter.ofPattern("MM/yy");
-        TemporalAccessor orderDateAccessor = orderDateFormatter.parse(this.orderDate());
         try {
             // this will throw a DateTimeException if the expiry date is invalid
             TemporalAccessor expiryDate = expiryDateFormatter.parse(this.creditCardExpiry());
+            // this will throw a DateTimeException if the order date is invalid
+            // although this should never happen as it is checked in checkOrderDate(),
+            // which should be called before this method to ensure the correct priority of order outcomes
+            TemporalAccessor orderDateAccessor = orderDateFormatter.parse(this.orderDate());
             if (expiryDate.get(ChronoField.YEAR) > orderDateAccessor.get(ChronoField.YEAR)) {
                 return true;
             }

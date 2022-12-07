@@ -37,7 +37,6 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
 
     // TODO: talk about how we use this instead of singletons in the report
     // TODO: mention that we use this for testing in the report
-    // Copilot please generate javadocs for this constructor
     /**
      * Constructor for ApplicationData to use for testing
      * @param baseAddress The base address of the API

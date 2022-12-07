@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Represents an order.
+ */
 public record Order(String orderNo,
                     String orderDate,
                     String customer,
@@ -21,9 +24,32 @@ public record Order(String orderNo,
                     String cvv,
                     int priceTotalInPence,
                     String[] orderItems) {
+    /**
+     * Default record constructor.
+     *
+     * @param String orderNo The order number.
+     * @param String orderDate The date of the order.
+     * @param String customer The customer.
+     * @param String creditCardNumber The credit card number.
+     * @param String creditCardExpiry The credit card expiry.
+     * @param String cvv The cvv.
+     * @param int priceTotalInPence The total price of the order in pence.
+     * @param String[] orderItems The order items.
+     */
 
+    /**
+     * The delivery charge in pence; should be added to the price of the order calculated from the menu items.
+     */
     public static final int DELIVERY_CHARGE = 100;
 
+    /**
+     * Validates the order.
+     *
+     * @param restaurant The restaurant which the order is for.
+     * @param menuItems The names of the pizzas available from all restaurants. (Used to check that all pizza
+     *                  names in the order are valid.)
+     * @return The tentative outcome of the order, before delivery.
+     */
     @NotNull
     public OrderOutcome validateOrder(Restaurant restaurant, MenuItem[] menuItems) {
         if (restaurant == null || menuItems == null) {

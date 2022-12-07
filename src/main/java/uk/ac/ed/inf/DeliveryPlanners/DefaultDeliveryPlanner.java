@@ -13,6 +13,12 @@ import uk.ac.ed.inf.Stores.ApplicationData;
 import java.util.*;
 
 public class DefaultDeliveryPlanner implements DeliveryPlanner {
+    /**
+     * The default delivery planner uses a pathfinder to find the shortest path for each order, and
+     * then plans the flights to deliver as many orders as possible within the limit of the drone's
+     * battery.
+     */
+
     // TODO: mention in docs that all the "get..." methods can return nulls or collections with nulls present
     // TODO: javadocs for classes, not just methods
     private final PathFinder flightpathFinder;

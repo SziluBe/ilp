@@ -1,31 +1,31 @@
 package uk.ac.ed.inf.Models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.ed.inf.Models.Input.Area;
 
+/**
+ * Represents a restaurant.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record LngLat(double lng, double lat) {
+public record LngLat(@JsonProperty("longitude") double lng, @JsonProperty("latitude") double lat) {
     /**
-     * Con
-     */
-
-    public static final double CLOSETO_DIST = 0.00015;
-    public static final double DOUBLE_EPSILON = 0.0000001;
-
-    /**
-     * Represents a point on the Earth's surface.
+     * Default record constructor.
      *
-     * @param lng The longitude of the point
-     * @param lat The latitude of the point
+     * @param double lng The longitude of the restaurant.
+     * @param double lat The latitude of the restaurant.
      */
 
-    @JsonCreator
-    public LngLat(@com.fasterxml.jackson.annotation.JsonProperty("longitude") double lng, @com.fasterxml.jackson.annotation.JsonProperty("latitude") double lat) {
-        this.lng = lng;
-        this.lat = lat;
-    }
+    /**
+     * The distance we consider to be close enough to another location for the drone to be considered as being there.
+     */
+    public static final double CLOSETO_DIST = 0.00015;
+
+    /**
+     * A value to be used when comparing doubles, if the difference between the two is less than this, they are considered equal.
+     */
+    public static final double DOUBLE_EPSILON = 0.0000001;
 
     /**
      * Checks whether the point represented by the LngLat instance is within the given Area or not, including boundary points.

@@ -2,6 +2,9 @@ package uk.ac.ed.inf.Models;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents a direction the drone can travel in.
+ */
 public enum Direction {
     E(0 * 22.5),
     ENE(1 * 22.5),
@@ -20,18 +23,44 @@ public enum Direction {
     SE(14 * 22.5),
     ESE(15 * 22.5);
 
+    /**
+     * We use null to represent hovering in place.
+     */
     public static final Direction HOVER = null;
+
+    /**
+     * The length of a step in degrees.
+     */
     public static final double MOVE_LENGTH = 0.00015;
+
+    /**
+     * The angle of the direction.
+     */
     private final double angle;
 
+    /**
+     * Enum constructor.
+     *
+     * @param angle The angle of the direction.
+     */
     Direction(double angle) {
         this.angle = angle;
     }
 
+    /**
+     * Gives the angle of the direction.
+     *
+     * @return The angle of the direction.
+     */
     public double getAngle() {
         return angle;
     }
 
+    /**
+     * Gives the opposite direction.
+     *
+     * @return The opposite direction.
+     */
     @NotNull
     public Direction getOpposite() {
         return Direction.values()[(this.ordinal() + 8) % 16];

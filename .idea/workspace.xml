@@ -5,11 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fb7dc8e7-b36c-4d5a-ae87-fd1f150579b7" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/dependency-reduced-pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/OutPutGenerators/JsonOutPutGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/OutputGenerators/JsonOutputGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/OutPutGenerators/OutPutGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/OutputGenerators/OutputGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Constants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/DeliveryPlanners/DefaultDeliveryPlanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/DeliveryPlanners/DefaultDeliveryPlanner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/DeliveryPlanners/DeliveryPlanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/DeliveryPlanners/DeliveryPlanner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Direction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Input/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Input/Order.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/LngLat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/LngLat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/PathFinders/AStarPathFinder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/PathFinders/AStarPathFinder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Stores/ApplicationData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Stores/ApplicationData.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/uk/ac/ed/inf/AppTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -33,7 +39,6 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/pom.xml" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/App.java" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Constants.java" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Direction.java" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Input/Area.java" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Models/Input/MenuItem.java" root0="FORCE_HIGHLIGHTING" />
@@ -47,6 +52,13 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="useMavenConfig" value="true" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -56,37 +68,52 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Downloaded.Files.Path.Enabled": "false",
-    "Repository.Attach.Annotations": "false",
-    "Repository.Attach.JavaDocs": "false",
-    "Repository.Attach.Sources": "false",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "project.structure.last.edited": "Libraries",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "reference.settings.project.maven.repository.indices",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="uk.ac.ed.inf" />
+    </key>
+    <key name="MoveMembersDialog.RECENTS_KEY">
+      <recent name="uk.ac.ed.inf.Models.Direction" />
+      <recent name="uk.ac.ed.inf.Stores.ApplicationData" />
+      <recent name="uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner" />
+      <recent name="uk.ac.ed.inf.Models.Input.Order" />
+      <recent name="uk.ac.ed.inf.Models.LngLat" />
     </key>
     <key name="ExtractSuperBase.RECENT_KEYS">
       <recent name="uk.ac.ed.inf" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.tests">
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="mvn compile" />
+      <command value="mvn package" />
+      <command value="mvn jar:jar" />
+    </option>
+  </component>
+  <component name="RunManager" selected="Maven.PizzaDronz [package]">
     <configuration name="AppTest.testGenerateGeojsons" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="PizzaDronz" />
       <extension name="coverage">
@@ -117,12 +144,39 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="PizzaDronz [package]" type="MavenRunConfiguration" factoryName="Maven" temporary="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="package" />
+              </list>
+            </option>
+            <option name="pomFileName" value="pom.xml" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="JUnit.tests" />
       <item itemvalue="JUnit.AppTest.testGenerateGeojsons" />
+      <item itemvalue="Maven.PizzaDronz [package]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Maven.PizzaDronz [package]" />
         <item itemvalue="JUnit.AppTest.testGenerateGeojsons" />
       </list>
     </recent_temporary>
@@ -142,7 +196,11 @@
       <workItem from="1669743213893" duration="610000" />
       <workItem from="1669750280260" duration="19629000" />
       <workItem from="1669825465092" duration="19104000" />
-      <workItem from="1669936318997" duration="5057000" />
+      <workItem from="1669936318997" duration="5960000" />
+      <workItem from="1670328348409" duration="199000" />
+      <workItem from="1670328570654" duration="610000" />
+      <workItem from="1670401765317" duration="6383000" />
+      <workItem from="1670409739885" duration="1924000" />
     </task>
     <task id="LOCAL-00001" summary="first cw1 progress (need docs/confusing parts)">
       <created>1663609872521</created>
@@ -305,7 +363,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669850757995</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="outPut -&gt; output">
+      <created>1669952274123</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1669952274123</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,7 +408,8 @@
     <MESSAGE value="removed some done todos" />
     <MESSAGE value="3 coding todos left except app" />
     <MESSAGE value="strategies and factories" />
-    <option name="LAST_COMMIT_MESSAGE" value="strategies and factories" />
+    <MESSAGE value="outPut -&gt; output" />
+    <option name="LAST_COMMIT_MESSAGE" value="outPut -&gt; output" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -377,11 +443,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/PathFinder/AStarPathFinder.java</url>
           <line>39</line>
           <option name="timeStamp" value="19" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/OutputGenerators/JsonOutputGenerator.java</url>
-          <line>59</line>
-          <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/DeliveryPlanner/DefaultDeliveryPlanner.java</url>

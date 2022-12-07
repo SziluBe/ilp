@@ -2,7 +2,6 @@ package uk.ac.ed.inf.Stores;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
-import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.Input.Area;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.Input.Restaurant;
@@ -17,6 +16,8 @@ import java.util.Arrays;
 
 public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] noFlyZones, Area centralArea,
                               LngLat deliveryOrigin, String date) {
+    public static final LngLat AT = new LngLat(-3.186874, 55.944494);
+
     // TODO: talk about how we use this instead of singletons in the report
     // TODO: mention that we use this for testing in the report
     public ApplicationData(@NotNull URL baseAddress, @NotNull String date, @NotNull LngLat deliveryOrigin, @NotNull ObjectMapper objectMapper) throws IOException {
@@ -40,7 +41,7 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
                         Arrays.stream(objectMapper.readValue(ApplicationData.urlFromArgs(args, "centralArea"), LngLat[].class)) // centralArea
                                 .toArray(LngLat[]::new)
                 ),
-                Constants.AT, // deliveryOrigin
+                AT, // deliveryOrigin
                 args[0] // date
         );
     }

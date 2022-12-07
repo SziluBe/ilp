@@ -1,7 +1,6 @@
 package uk.ac.ed.inf.Models;
 
 import org.jetbrains.annotations.NotNull;
-import uk.ac.ed.inf.Constants;
 
 public enum Direction {
     E(0 * 22.5),
@@ -21,6 +20,8 @@ public enum Direction {
     SE(14 * 22.5),
     ESE(15 * 22.5);
 
+    public static final Direction HOVER = null;
+    public static final double MOVE_LENGTH = 0.00015;
     private final double angle;
 
     Direction(double angle) {
@@ -44,8 +45,8 @@ public enum Direction {
      */
     @NotNull
     public LngLat toLngLat() {
-        double lng = Math.cos(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;
-        double lat = Math.sin(Math.toRadians(this.angle)) * Constants.MOVE_LENGTH;
+        double lng = Math.cos(Math.toRadians(this.angle)) * MOVE_LENGTH;
+        double lat = Math.sin(Math.toRadians(this.angle)) * MOVE_LENGTH;
 
         return new LngLat(lng, lat);
     }

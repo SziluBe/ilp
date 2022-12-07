@@ -2,7 +2,6 @@ package uk.ac.ed.inf.DeliveryPlanners;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.Input.MenuItem;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.Input.Restaurant;
@@ -116,7 +115,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
                 Integer addedSteps = getRequiredStepsForOrder(order);
                 if (addedSteps != null) {
                     int newSteps = nSteps + addedSteps;
-                    if (newSteps <= Constants.MAX_MOVES) {
+                    if (newSteps <= DeliveryPlanner.MAX_MOVES) {
                         orderToOutcomeMap.put(order, OrderOutcome.Delivered);
                         nSteps = newSteps;
                     }

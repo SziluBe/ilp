@@ -47,7 +47,7 @@ public class AppTest {
 
         for (LocalDate date : dates) {
             String dateString = date.toString();
-            LngLat deliveryOrigin = Constants.AT;
+            LngLat deliveryOrigin = ApplicationData.AT;
             ObjectMapper objectMapper = new ObjectMapper();
 
             ApplicationData applicationData = new ApplicationData(baseAddress, dateString, deliveryOrigin, objectMapper);
@@ -68,8 +68,8 @@ public class AppTest {
                     }).toList();
 
             for (int j = 0; j < steps.size() - 1; j++) {
-                assert (steps.get(j).distance() >= Constants.MOVE_LENGTH - 0.000001 &&
-                        steps.get(j).distance() <= Constants.MOVE_LENGTH + 0.000001) ||
+                assert (steps.get(j).distance() >= Direction.MOVE_LENGTH - 0.000001 &&
+                        steps.get(j).distance() <= Direction.MOVE_LENGTH + 0.000001) ||
                        (steps.get(j).distance() >= 0 - 0.000001 &&
                         steps.get(j).distance() <= 0 + 0.000001) :
                         "Move not correct length " + steps.get(j).distance();

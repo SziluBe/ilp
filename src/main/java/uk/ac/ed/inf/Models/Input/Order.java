@@ -1,7 +1,6 @@
 package uk.ac.ed.inf.Models.Input;
 
 import org.jetbrains.annotations.NotNull;
-import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.OrderOutcome;
 
 import java.time.DateTimeException;
@@ -22,6 +21,8 @@ public record Order(String orderNo,
                     String cvv,
                     int priceTotalInPence,
                     String[] orderItems) {
+
+    public static final int DELIVERY_CHARGE = 100;
 
     @NotNull
     public OrderOutcome validateOrder(Restaurant restaurant, MenuItem[] menuItems) {
@@ -74,7 +75,7 @@ public record Order(String orderNo,
                         // one menu item with a given name
                         .mapToInt(MenuItem::priceInPence)
                         .sum())
-                .sum() + Constants.DELIVERY_CHARGE;
+                .sum() + DELIVERY_CHARGE;
     }
 
 

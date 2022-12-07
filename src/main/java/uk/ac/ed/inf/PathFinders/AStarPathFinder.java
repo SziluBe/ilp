@@ -2,7 +2,6 @@ package uk.ac.ed.inf.PathFinders;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.Direction;
 import uk.ac.ed.inf.Models.Input.Area;
 import uk.ac.ed.inf.Models.Input.Restaurant;
@@ -45,9 +44,9 @@ public class AStarPathFinder implements PathFinder {
             LngLat firstLngLat = flightPath.get(0).from();
             LngLat lastLngLat = flightPath.get(flightPath.size() - 1).to();
 
-            flightPath.add(new Step(lastLngLat, Constants.HOVER, lastLngLat)); // hover on pickup
+            flightPath.add(new Step(lastLngLat, Direction.HOVER, lastLngLat)); // hover on pickup
             flightPath.addAll(reversedSteps);
-            flightPath.add(new Step(firstLngLat, Constants.HOVER, firstLngLat)); // hover on drop-off
+            flightPath.add(new Step(firstLngLat, Direction.HOVER, firstLngLat)); // hover on drop-off
 
             restaurantsPathsMap.put(restaurant, flightPath);
             restaurantsPathCalculatedMap.put(restaurant, true);

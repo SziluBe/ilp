@@ -11,6 +11,8 @@ import uk.ac.ed.inf.Stores.ApplicationData;
 import java.util.List;
 
 public interface DeliveryPlanner {
+    int MAX_MOVES = 2000;
+
     @NotNull
     static DeliveryPlanner getDeliveryPlanner(@NotNull ApplicationData appData, @NotNull PathFinder pathFinder) {
         return new DefaultDeliveryPlanner(appData, pathFinder);

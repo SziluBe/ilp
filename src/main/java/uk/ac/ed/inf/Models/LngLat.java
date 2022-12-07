@@ -3,21 +3,32 @@ package uk.ac.ed.inf.Models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.jetbrains.annotations.NotNull;
-import uk.ac.ed.inf.Constants;
 import uk.ac.ed.inf.Models.Input.Area;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record LngLat(double lng, double lat) {
+    /**
+     * Con
+     */
+
+    public static final double CLOSETO_DIST = 0.00015;
+    public static final double DOUBLE_EPSILON = 0.0000001;
+
+    /**
+     * Represents a point on the Earth's surface.
+     *
+     * @param lng The longitude of the point
+     * @param lat The latitude of the point
+     */
+
     @JsonCreator
     public LngLat(@com.fasterxml.jackson.annotation.JsonProperty("longitude") double lng, @com.fasterxml.jackson.annotation.JsonProperty("latitude") double lat) {
         this.lng = lng;
         this.lat = lat;
     }
 
-    // TODO: should return true for boundary points (corners included)
-
     /**
-     * Checks whether the point represented by the LngLat instance is within the given Area or not.
+     * Checks whether the point represented by the LngLat instance is within the given Area or not, including boundary points.
      *
      * @return Return true if the point is inside, false otherwise
      */
@@ -27,10 +38,19 @@ public record LngLat(double lng, double lat) {
         boolean result = false;
         LngLat[] points = area.getVertices();
         for (i = 0, j = points.length - 1; i < points.length; j = i++) {
-            if ((points[i].lat() > this.lat()) != (points[j].lat() > this.lat()) && (this.lng() < (points[j].lng() - points[i].lng()) * (this.lat() - points[i].lat()) / (points[j].lat() - points[i].lat()) + points[i].lng())) {
+            if ((points[i].lat() > this.lat()) != (points[j].lat() > this.lat()) &&
+                    (this.lng() < (points[j].lng() - points[i].lng()) * (this.lat() - points[i].lat()) / (points[j].lat() - points[i].lat()) + points[i].lng())) {
                 result = !result;
             }
         }
+        // Our method so far returns false for points on the boundary, so we add the following
+        for (i = 0; i < points.length - 1; i++) {
+            // using the triangle inequality to determine if the point lies on this edge
+            if (Math.abs(this.distanceTo(points[i]) + this.distanceTo(points[i + 1]) - points[i].distanceTo(points[i + 1])) < DOUBLE_EPSILON) {
+                return true;
+            }
+        }
+
         return result;
     }
 
@@ -55,7 +75,7 @@ public record LngLat(double lng, double lat) {
      * @return Return true if the 2 points are close to each other, false otherwise.
      */
     public boolean closeTo(LngLat target) {
-        return this.distanceTo(target) < Constants.CLOSETO_DIST;
+        return this.distanceTo(target) < CLOSETO_DIST;
     }
 
     /**
@@ -67,7 +87,7 @@ public record LngLat(double lng, double lat) {
      */
     @NotNull
     public LngLat nextPosition(Direction dir) {
-        if (dir == Constants.HOVER) {
+        if (dir == Direction.HOVER) {
             return this;
         }
         return add(dir.toLngLat());

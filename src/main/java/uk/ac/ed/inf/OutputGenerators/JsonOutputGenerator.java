@@ -64,6 +64,8 @@ public class JsonOutputGenerator implements OutputGenerator {
             );
         }
 
+        // TODO: separate writing to a file into different function for testability
+        // TODO: mention this in report
         String deliveriesJsonString;
 
         // write to file

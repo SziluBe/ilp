@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Hello world!
+ * This is the main class/entry point for the application.
  */
 public class App {
     public static void main(String[] args) {

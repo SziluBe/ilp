@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="fb7dc8e7-b36c-4d5a-ae87-fd1f150579b7" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Stores/ApplicationData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/Stores/ApplicationData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/uk/ac/ed/inf/App.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -191,7 +191,7 @@
       <workItem from="1670328570654" duration="610000" />
       <workItem from="1670401765317" duration="6383000" />
       <workItem from="1670409739885" duration="4381000" />
-      <workItem from="1670415507762" duration="7132000" />
+      <workItem from="1670415507762" duration="7323000" />
     </task>
     <task id="LOCAL-00001" summary="first cw1 progress (need docs/confusing parts)">
       <created>1663609872521</created>
@@ -389,7 +389,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670422588867</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="unnecessary comment removed">
+      <created>1670422677855</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1670422677855</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -407,7 +414,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="first cw1 progress (need docs/confusing parts)" />
     <MESSAGE value="centralarea, see todos" />
     <MESSAGE value="abababab final" />
     <MESSAGE value="final formatting" />
@@ -432,7 +438,8 @@
     <MESSAGE value="javadocs except for complicated classes lole" />
     <MESSAGE value="javadocs finished???" />
     <MESSAGE value="javadocs finished??? nr.2" />
-    <option name="LAST_COMMIT_MESSAGE" value="javadocs finished??? nr.2" />
+    <MESSAGE value="unnecessary comment removed" />
+    <option name="LAST_COMMIT_MESSAGE" value="unnecessary comment removed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

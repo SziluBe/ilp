@@ -32,7 +32,7 @@ public class JsonOutputGenerator implements OutputGenerator {
      * Default constructor.
      *
      * @param deliveryPlanner The delivery planner.
-     * @param objectMapper The object mapper.
+     * @param objectMapper    The object mapper.
      */
     public JsonOutputGenerator(DeliveryPlanner deliveryPlanner,
                                ObjectMapper objectMapper) {
@@ -41,9 +41,8 @@ public class JsonOutputGenerator implements OutputGenerator {
     }
 
     /**
-     * @inheritDoc
-     * Each entry in the output JSON array is a JSON object serialised from a {@link DeliveryEntry} object.
-     *
+     * @inheritDoc Each entry in the output JSON array is a JSON object serialised from a {@link DeliveryEntry} object.
+     * <p>
      * The output is written to a file called "deliveries-YYYY-MM-DD.json".
      */
     @NotNull
@@ -82,9 +81,8 @@ public class JsonOutputGenerator implements OutputGenerator {
     }
 
     /**
-     * @inheritDoc
-     * Generates the map output in GeoJSON format.
-     *
+     * @inheritDoc Generates the map output in GeoJSON format.
+     * <p>
      * The output is written to a file called "drone-YYYY-MM-DD.json".
      */
     @NotNull
@@ -132,9 +130,8 @@ public class JsonOutputGenerator implements OutputGenerator {
     }
 
     /**
-     * @inheritDoc
-     * Each entry in the output JSON array is a JSON object serialised from a {@link FlightPathEntry} object.
-     *
+     * @inheritDoc Each entry in the output JSON array is a JSON object serialised from a {@link FlightPathEntry} object.
+     * <p>
      * The output is written to a file called "flightpath-YYYY-MM-DD.json".
      */
     @NotNull

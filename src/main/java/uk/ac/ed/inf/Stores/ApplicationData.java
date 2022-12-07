@@ -37,12 +37,14 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
 
     // TODO: talk about how we use this instead of singletons in the report
     // TODO: mention that we use this for testing in the report
+
     /**
      * Constructor for ApplicationData to use for testing
-     * @param baseAddress The base address of the API
-     * @param date The date to get data for
+     *
+     * @param baseAddress    The base address of the API
+     * @param date           The date to get data for
      * @param deliveryOrigin The place we are delivering to (AT)
-     * @param objectMapper The object mapper to use
+     * @param objectMapper   The object mapper to use
      */
     public ApplicationData(@NotNull URL baseAddress, @NotNull String date, @NotNull LngLat deliveryOrigin, @NotNull ObjectMapper objectMapper) throws IOException {
         this(
@@ -57,7 +59,8 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
 
     /**
      * Constructor for ApplicationData to use in the main method
-     * @param args The command line arguments
+     *
+     * @param args         The command line arguments
      * @param objectMapper The object mapper to use
      */
     public ApplicationData(@NotNull String[] args, ObjectMapper objectMapper) throws IOException, URISyntaxException {

@@ -12,13 +12,17 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner;
-import uk.ac.ed.inf.Models.*;
+import uk.ac.ed.inf.Models.Direction;
+import uk.ac.ed.inf.Models.OrderOutcome;
+import uk.ac.ed.inf.Models.LngLat;
+import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.OutputGenerators.OutputGenerator;
 import uk.ac.ed.inf.PathFinders.PathFinder;
 import uk.ac.ed.inf.Stores.ApplicationData;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for simple App.
@@ -70,8 +74,8 @@ public class AppTest {
             for (int j = 0; j < steps.size() - 1; j++) {
                 assert (steps.get(j).distance() >= Direction.MOVE_LENGTH - 0.000001 &&
                         steps.get(j).distance() <= Direction.MOVE_LENGTH + 0.000001) ||
-                       (steps.get(j).distance() >= 0 - 0.000001 &&
-                        steps.get(j).distance() <= 0 + 0.000001) :
+                        (steps.get(j).distance() >= 0 - 0.000001 &&
+                                steps.get(j).distance() <= 0 + 0.000001) :
                         "Move not correct length " + steps.get(j).distance();
             }
 
@@ -94,8 +98,7 @@ public class AppTest {
                 assertEquals(0, deliveryPlanner.getInvalidOrders().length);
                 assertEquals(0, steps.size());
                 assertEquals(0, deliveredOrders.length);
-            }
-            else {
+            } else {
                 assert steps.size() == 1922 : "Total distance not correct " + steps.size();
                 assert applicationData.orders().length == deliveredOrders.length + deliveryPlanner.getValidUndeliveredOrders().length + deliveryPlanner.getInvalidOrders().length :
                         "Orders not correctly split into delivered, valid undelivered and invalid";
@@ -329,8 +332,7 @@ public class AppTest {
 }
 
 
-
- // convert to geojson
+// convert to geojson
 //  LngLat[getLng=-3.190578818321228, getLat=55.94402412577528]
 //          LngLat[getLng=-3.1899887323379517, getLat=55.94284650540911]
 //          LngLat[getLng=-3.187097311019897, getLat=55.94328811724263]

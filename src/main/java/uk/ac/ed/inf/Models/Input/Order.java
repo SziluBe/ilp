@@ -46,8 +46,8 @@ public record Order(String orderNo,
      * Validates the order.
      *
      * @param restaurant The restaurant which the order is for.
-     * @param menuItems The names of the pizzas available from all restaurants. (Used to check that all pizza
-     *                  names in the order are valid.)
+     * @param menuItems  The names of the pizzas available from all restaurants. (Used to check that all pizza
+     *                   names in the order are valid.)
      * @return The tentative outcome of the order, before delivery.
      */
     @NotNull

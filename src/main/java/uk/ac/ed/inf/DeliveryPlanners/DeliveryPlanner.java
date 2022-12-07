@@ -22,7 +22,7 @@ public interface DeliveryPlanner {
     /**
      * Gets an instance of the appropriate kind of delivery planner for the given combination of application data and pathfinder.
      *
-     * @param appData The application data.
+     * @param appData    The application data.
      * @param pathFinder The pathfinder.
      * @return The appropriate delivery planner.
      */

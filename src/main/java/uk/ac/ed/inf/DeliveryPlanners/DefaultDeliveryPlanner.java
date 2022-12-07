@@ -38,7 +38,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
     /**
      * Creates a new instance of the default delivery planner.
      *
-     * @param appData The application data.
+     * @param appData          The application data.
      * @param flightpathFinder The pathfinder.
      */
     public DefaultDeliveryPlanner(@NotNull ApplicationData appData, @NotNull PathFinder flightpathFinder) {
@@ -122,7 +122,7 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
 
         var deliverableOrders = Arrays.stream(appData.orders())
                 .filter(order -> getRequiredStepsForOrder(order) != null) // TODO: mention IntelliJ warning in report
-                .sorted(Comparator.comparingInt(this::getRequiredStepsForOrder)) // cannot be null, we check in filter
+                .sorted(Comparator.comparingInt(this::getRequiredStepsForOrder)) // cannot be null; we check in filter
                 .toArray(Order[]::new);
         // sort orders by steps
         // calculate final outcomes

@@ -25,7 +25,7 @@ public interface OutputGenerator {
      * Generates the output that gives each step of the flightpath for the given date.
      *
      * @param deliveredOrders The orders that were delivered on the given date.
-     * @param date The date.
+     * @param date            The date.
      * @return The output, in a format specified by the implementation.
      */
     String generateFlightPathOutput(@NotNull Order[] deliveredOrders, @NotNull String date);
@@ -34,7 +34,7 @@ public interface OutputGenerator {
      * Generates output that can be used to visualise the flightpath for the given date on a map.
      *
      * @param deliveredOrders The orders that were delivered on the given date.
-     * @param date The date.
+     * @param date            The date.
      * @return The output, in a format specified by the implementation.
      */
     String generateFlightPathMapOutput(@NotNull Order[] deliveredOrders, @NotNull String date);
@@ -43,7 +43,7 @@ public interface OutputGenerator {
      * Generates the output that gives the details of the delivery for each order for the given date.
      *
      * @param orders The orders for the given date.
-     * @param date The date.
+     * @param date   The date.
      * @return The output, in a format specified by the implementation.
      */
     String generateDeliveriesOutput(@NotNull Order[] orders, @NotNull String date);

@@ -115,8 +115,7 @@ public class AStarPathFinder implements PathFinder {
         );
         openSet.add(start);
 
-        double centralRevisitPenalty;
-        double noFlyZonePenalty;
+        // ensure we only enter the central area once
         boolean beenToCentral = false;
 
         int outerIterations = 0;
@@ -124,63 +123,88 @@ public class AStarPathFinder implements PathFinder {
         long avgDuration = 0;
         int avgOpenSetSize = 0;
 
-        while (!openSet.isEmpty()) { // too many iterations here
+        while (!openSet.isEmpty()) {
             long startTime = System.nanoTime();
             outerIterations++;
             var current = openSet.poll();
             assert current != null; // we don't add null to openSet, nor do we start an iteration with an empty openSet
             if (current.equals(goal) || current.closeTo(goal)) {
-                System.out.println("Outer iterations: " + outerIterations);
-                System.out.println("Iterations: " + iters);
-                System.out.println("Avg duration: " + avgDuration);
-                System.out.println("Avg open set size: " + avgOpenSetSize);
+                // we've reached the goal
+                printStats(outerIterations, iters, avgDuration, avgOpenSetSize);
                 return reconstructPath(current, cameFrom, stepDirs);
             }
+            // ensure we only enter the central area once
             if (current.inArea(centralArea)) {
                 beenToCentral = true;
             }
 
+            // try all directions
             for (Direction direction : Direction.values()) {
-                LngLat neighbor = current.nextPosition(direction);
                 iters++;
-                centralRevisitPenalty = 0.0;
-                noFlyZonePenalty = 0.0;
-
-                if (beenToCentral && !current.inArea(centralArea) && neighbor.inArea(centralArea)) {
-                    centralRevisitPenalty = Double.POSITIVE_INFINITY;
-                }
-
-                for (Area noFlyZone : noFlyZones) {
-                    if (neighbor.inArea(noFlyZone)) {
-                        noFlyZonePenalty = Double.POSITIVE_INFINITY;
-                    }
-                }
-
-                // tentativeGScore is the distance from start to the neighbor through current
-                var tentativeGScore = gScore.get(current)
-                        + current.distanceTo(neighbor)
-                        + centralRevisitPenalty
-                        + noFlyZonePenalty;
-                if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
-                    // This path to neighbor is better than any previous one. Record it!
-                    cameFrom.put(neighbor, current);
-                    stepDirs.put(neighbor, direction);
-                    gScore.put(neighbor, tentativeGScore);
-                    if (!openSet.contains(neighbor)) {
-                        openSet.add(neighbor);
-                    }
-                }
+                handleStepInDirection(cameFrom, stepDirs, gScore, openSet, beenToCentral, current, direction);
             }
+
             long endTime = System.nanoTime();
             avgDuration = (avgDuration * (outerIterations - 1) + (endTime - startTime)) / outerIterations;
             avgOpenSetSize = (avgOpenSetSize * (outerIterations - 1) + openSet.size()) / outerIterations;
         }
 
         // Open set is empty but goal was never reached
+        printStats(outerIterations, iters, avgDuration, avgOpenSetSize);
+        return null;
+    }
+
+    private static void printStats(int outerIterations, int iters, long avgDuration, int avgOpenSetSize) {
         System.out.println("Outer iterations: " + outerIterations);
         System.out.println("Iterations: " + iters);
         System.out.println("Avg duration: " + avgDuration);
         System.out.println("Avg open set size: " + avgOpenSetSize);
-        return null;
+    }
+
+    private void handleStepInDirection(HashMap<LngLat, LngLat> cameFrom,
+                                       HashMap<LngLat, Direction> stepDirs,
+                                       HashMap<LngLat, Double> gScore,
+                                       PriorityQueue<LngLat> openSet,
+                                       boolean beenToCentral,
+                                       LngLat current,
+                                       Direction direction) {
+        LngLat neighbor = current.nextPosition(direction);
+        double centralRevisitPenalty = 0.0;
+        double noFlyZonePenalty = 0.0;
+
+        for (Area noFlyZone : noFlyZones) {
+            // the second condition is to avoid cutting corners
+            // i.e. going through a no-fly zone in a way that neither the start nor the end
+            // of the step is in the no-fly zone
+            // it's more expensive to calculate, but most cases should be covered by the first condition
+            // and therefore short-circuit before the second condition is evaluated
+            if (neighbor.inArea(noFlyZone) || new Step(current, direction, neighbor).intersectsArea(noFlyZone)) {
+                noFlyZonePenalty = Double.POSITIVE_INFINITY;
+                // small optimization: if we're in a no-fly zone, we don't need to check the other no-fly zones
+                break;
+            }
+        }
+
+        // ensure we only enter the central area once
+        if (beenToCentral && !current.inArea(centralArea) &&
+                // again, the second condition below is to avoid cutting corners
+                (neighbor.inArea(centralArea) || new Step(current, direction, neighbor).intersectsArea(centralArea))) {
+            centralRevisitPenalty = Double.POSITIVE_INFINITY;
+        }
+
+        // tentativeGScore is the distance from start to the neighbor through current
+        var tentativeGScore = gScore.get(current)
+                + current.distanceTo(neighbor)
+                + centralRevisitPenalty
+                + noFlyZonePenalty;
+        if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
+            // This path to neighbor is better than any previous one. Record it!
+            cameFrom.put(neighbor, current);
+            stepDirs.put(neighbor, direction);
+            gScore.put(neighbor, tentativeGScore);
+            if (!openSet.contains(neighbor)) {
+                openSet.add(neighbor);
+            }
+        }
     }
 }

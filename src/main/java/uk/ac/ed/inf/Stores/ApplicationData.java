@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class to hold the data we get from the API
@@ -69,10 +70,9 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
                 objectMapper.readValue(ApplicationData.urlFromArgs(args, "orders/" + args[0]), Order[].class), // orders
                 Arrays.stream((objectMapper.readValue(ApplicationData.urlFromArgs(args, "noFlyZones"), Area[].class))) // noFlyZones
                         .toArray(Area[]::new),
-                new Area(
-                        Arrays.stream(objectMapper.readValue(ApplicationData.urlFromArgs(args, "centralArea"), LngLat[].class)) // centralArea
-                                .toArray(LngLat[]::new)
-                ),
+                // the Central Area does not conform to the GeoJSON spec on the server, so we need to
+                // add the first point to the end of the array to make it a closed polygon
+                readCentralArea(objectMapper, ApplicationData.urlFromArgs(args, "centralArea")), // centralArea
                 AT, // deliveryOrigin
                 args[0] // date
         );
@@ -95,5 +95,11 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
             path += "/";
         }
         return new URI(baseAddress + path).toURL();
+    }
+
+    private static Area readCentralArea(ObjectMapper objectMapper, URL url) throws IOException {
+        List<LngLat> verticesList = Arrays.stream(objectMapper.readValue(url, LngLat[].class)).toList();
+        verticesList.add(verticesList.get(0));
+        return new Area(verticesList.toArray(new LngLat[0]));
     }
 }

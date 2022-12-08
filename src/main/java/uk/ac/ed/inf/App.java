@@ -52,6 +52,10 @@ public class App {
         Order[] deliveredOrders = deliveryPlanner.getDeliveredOrders();
         var outputGenerator = OutputGenerator.getOutputGenerator(deliveryPlanner);
 
+        String deliveries = outputGenerator.generateDeliveriesOutput(applicationData.orders(), applicationData.date());
+        String flightPathJson = outputGenerator.generateFlightPathOutput(deliveredOrders, applicationData.date());
+        String flightPathGeoJson = outputGenerator.generateFlightPathMapOutput(deliveredOrders, applicationData.date());
+
         // used only for printing
         List<Step> steps = Arrays.stream(deliveredOrders)
                 .map(deliveryPlanner::getPathForOrder)
@@ -62,10 +66,6 @@ public class App {
                     return orderSteps.stream();
                 })
                 .toList();
-
-        String deliveries = outputGenerator.generateDeliveriesOutput(applicationData.orders(), applicationData.date());
-        String flightPathJson = outputGenerator.generateFlightPathOutput(deliveredOrders, applicationData.date());
-        String flightPathGeoJson = outputGenerator.generateFlightPathMapOutput(deliveredOrders, applicationData.date());
 
         System.out.println("Deliveries Json: " + deliveries);
         System.out.println("Flightpath Json: " + flightPathJson);

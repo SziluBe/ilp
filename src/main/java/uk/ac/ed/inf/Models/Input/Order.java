@@ -1,7 +1,7 @@
 package uk.ac.ed.inf.Models.Input;
 
 import org.jetbrains.annotations.NotNull;
-import uk.ac.ed.inf.Models.OrderOutcome;
+import uk.ac.ed.inf.Models.Output.OrderOutcome;
 
 import java.time.DateTimeException;
 import java.time.format.DateTimeFormatter;

@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner;
 import uk.ac.ed.inf.Models.Direction;
-import uk.ac.ed.inf.Models.OrderOutcome;
+import uk.ac.ed.inf.Models.Output.OrderOutcome;
 import uk.ac.ed.inf.Models.LngLat;
 import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.Models.Input.Order;

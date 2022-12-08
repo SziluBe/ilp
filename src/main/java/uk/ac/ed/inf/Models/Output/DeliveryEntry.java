@@ -1,7 +1,6 @@
 package uk.ac.ed.inf.Models.Output;
 
 import org.jetbrains.annotations.NotNull;
-import uk.ac.ed.inf.Models.OrderOutcome;
 
 /**
  * Represents an entry in the delivery that is output to the user (as a JSON).

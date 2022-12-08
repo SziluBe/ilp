@@ -1,4 +1,4 @@
-package uk.ac.ed.inf.Models;
+package uk.ac.ed.inf.Models.Output;
 
 /**
  * Represents the outcome of an order.

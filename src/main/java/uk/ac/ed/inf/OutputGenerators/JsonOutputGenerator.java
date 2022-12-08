@@ -8,7 +8,7 @@ import com.mapbox.geojson.Point;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.ed.inf.DeliveryPlanners.DeliveryPlanner;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.Models.OrderOutcome;
+import uk.ac.ed.inf.Models.Output.OrderOutcome;
 import uk.ac.ed.inf.Models.Output.DeliveryEntry;
 import uk.ac.ed.inf.Models.Output.FlightPathEntry;
 import uk.ac.ed.inf.Models.Step;

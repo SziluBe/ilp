@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import uk.ac.ed.inf.Models.Input.MenuItem;
 import uk.ac.ed.inf.Models.Input.Order;
 import uk.ac.ed.inf.Models.Input.Restaurant;
-import uk.ac.ed.inf.Models.OrderOutcome;
+import uk.ac.ed.inf.Models.Output.OrderOutcome;
 import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.PathFinders.PathFinder;
 import uk.ac.ed.inf.Stores.ApplicationData;

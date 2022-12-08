@@ -3,7 +3,7 @@ package uk.ac.ed.inf.DeliveryPlanners;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import uk.ac.ed.inf.Models.Input.Order;
-import uk.ac.ed.inf.Models.OrderOutcome;
+import uk.ac.ed.inf.Models.Output.OrderOutcome;
 import uk.ac.ed.inf.Models.Step;
 import uk.ac.ed.inf.PathFinders.PathFinder;
 import uk.ac.ed.inf.Stores.ApplicationData;

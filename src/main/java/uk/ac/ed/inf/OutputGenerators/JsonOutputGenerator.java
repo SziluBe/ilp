@@ -64,8 +64,6 @@ public class JsonOutputGenerator implements OutputGenerator {
             );
         }
 
-        // TODO: separate writing to a file into different function for testability
-        // TODO: mention this in report
         String deliveriesJsonString;
 
         // write to file
@@ -150,7 +148,7 @@ public class JsonOutputGenerator implements OutputGenerator {
                         order.orderNo(),
                         step.from().lng(),
                         step.from().lat(),
-                        dir != null ? dir.getAngle() : 0, // TODO: mention in report??
+                        dir != null ? dir.getAngle() : 0,
                         step.to().lng(),
                         step.to().lat(),
                         System.nanoTime()

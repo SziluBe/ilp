@@ -19,9 +19,6 @@ import java.util.stream.Stream;
  */
 public class App {
     public static void main(String[] args) {
-        // TODO: documentation
-        // TODO: revise access modifiers
-
         if (args.length < 2) {
             System.err.println("Please provide the following arguments: <date> <baseAddress>, optional arguments: <seed>");
             return;

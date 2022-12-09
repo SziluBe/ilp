@@ -26,8 +26,6 @@ public class AStarPathFinder implements PathFinder {
     private final Area centralArea;
     private final LngLat deliveryOrigin;
 
-    // TODO: mention strategies in report
-
     /**
      * Default constructor.
      *
@@ -38,8 +36,6 @@ public class AStarPathFinder implements PathFinder {
         this.centralArea = applicationData.centralArea();
         this.deliveryOrigin = applicationData.deliveryOrigin();
     }
-
-    // TODO: document that this can return null
 
     /**
      * Gets the flight path to the given restaurant using the A* algorithm.

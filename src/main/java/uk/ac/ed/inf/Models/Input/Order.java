@@ -38,6 +38,11 @@ public record Order(String orderNo,
      */
 
     /**
+     * The maximum number of pizzas our drone can carry at the same time.
+     */
+    public static final int MAX_PIZZA_COUNT = 4;
+
+    /**
      * The delivery charge in pence; should be added to the price of the order calculated from the menu items.
      */
     public static final int DELIVERY_CHARGE = 100;
@@ -187,7 +192,7 @@ public record Order(String orderNo,
 
     private boolean checkPizzaCount() {
         int l = this.orderItems.length;
-        return 0 < l && l < 5;
+        return 0 < l && l < MAX_PIZZA_COUNT + 1;
     }
 
     private boolean checkPizzasDefined(MenuItem[] menuItems) {

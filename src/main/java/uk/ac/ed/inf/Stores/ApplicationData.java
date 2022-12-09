@@ -12,8 +12,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Class to hold the data we get from the API
@@ -35,9 +35,6 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
      * The location of Appleton Tower.
      */
     public static final LngLat AT = new LngLat(-3.186874, 55.944494);
-
-    // TODO: talk about how we use this instead of singletons in the report
-    // TODO: mention that we use this for testing in the report
 
     /**
      * Constructor for ApplicationData to use for testing
@@ -98,7 +95,7 @@ public record ApplicationData(Restaurant[] restaurants, Order[] orders, Area[] n
     }
 
     private static Area readCentralArea(ObjectMapper objectMapper, URL url) throws IOException {
-        List<LngLat> verticesList = Arrays.stream(objectMapper.readValue(url, LngLat[].class)).toList();
+        ArrayList<LngLat> verticesList = Arrays.stream(objectMapper.readValue(url, LngLat[].class)).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         verticesList.add(verticesList.get(0));
         return new Area(verticesList.toArray(new LngLat[0]));
     }

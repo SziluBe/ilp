@@ -24,8 +24,6 @@ import java.util.Comparator;
  */
 public class DefaultDeliveryPlanner implements DeliveryPlanner {
 
-    // TODO: mention in docs that all the "get..." methods can return nulls or collections with nulls present
-    // TODO: javadocs for classes, not just methods
     private final PathFinder flightpathFinder;
     private final ApplicationData appData;
     private final Map<Order, Restaurant> orderToRestaurantMap = new HashMap<>();
@@ -80,11 +78,11 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
 
         for (var order : appData.orders()) {
             var restaurant = getRestaurantForOrder(order);
-            if (restaurant == null) { // TODO: comment
+            if (restaurant == null) {
                 continue;
             }
             List<Step> flightPathEntries = flightpathFinder.getFlightPath(restaurant);
-            if (flightPathEntries != null) { // TODO: comment
+            if (flightPathEntries != null) {
                 orderToRequiredStepsMap.put(
                         order,
                         flightPathEntries.size()
@@ -121,8 +119,8 @@ public class DefaultDeliveryPlanner implements DeliveryPlanner {
         }
 
         var deliverableOrders = Arrays.stream(appData.orders())
-                .filter(order -> getRequiredStepsForOrder(order) != null) // TODO: mention IntelliJ warning in report
-                .sorted(Comparator.comparingInt(this::getRequiredStepsForOrder)) // cannot be null; we check in filter
+                .filter(order -> getRequiredStepsForOrder(order) != null)
+                .sorted(Comparator.comparingInt(this::getRequiredStepsForOrder)) // cannot be null despite IntelliJ warning; we check in filter
                 .toArray(Order[]::new);
         // sort orders by steps
         // calculate final outcomes

@@ -37,6 +37,13 @@ public class AStarPathFinder implements PathFinder {
         this.deliveryOrigin = applicationData.deliveryOrigin();
     }
 
+    private static void printStats(int outerIterations, int iters, long avgDuration, int avgOpenSetSize) {
+        System.out.println("Outer iterations: " + outerIterations);
+        System.out.println("Iterations: " + iters);
+        System.out.println("Avg duration: " + avgDuration);
+        System.out.println("Avg open set size: " + avgOpenSetSize);
+    }
+
     /**
      * Gets the flight path to the given restaurant using the A* algorithm.
      *
@@ -147,13 +154,6 @@ public class AStarPathFinder implements PathFinder {
         // Open set is empty but goal was never reached
         printStats(outerIterations, iters, avgDuration, avgOpenSetSize);
         return null;
-    }
-
-    private static void printStats(int outerIterations, int iters, long avgDuration, int avgOpenSetSize) {
-        System.out.println("Outer iterations: " + outerIterations);
-        System.out.println("Iterations: " + iters);
-        System.out.println("Avg duration: " + avgDuration);
-        System.out.println("Avg open set size: " + avgOpenSetSize);
     }
 
     private void handleStepInDirection(HashMap<LngLat, LngLat> cameFrom,

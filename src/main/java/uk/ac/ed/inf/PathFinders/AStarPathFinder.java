@@ -38,6 +38,7 @@ public class AStarPathFinder implements PathFinder {
     }
 
     private static void printStats(int outerIterations, int iters, long avgDuration, int avgOpenSetSize) {
+        System.out.println("A* stats:");
         System.out.println("Outer iterations: " + outerIterations);
         System.out.println("Iterations: " + iters);
         System.out.println("Avg duration: " + avgDuration);
